@@ -1,54 +1,25 @@
 import express from "express";
+import todoRoutes from "./routes/todos.js";
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
 
-let todos = [
-  { id: 1, title: "Buy milk", completed: false },
-  { id: 2, title: "Walk the dog", completed: true },
-];
-let nextId = 3;
-
 app.get("/", (req, res) => {
   res.send("Hello from CodeBox!");
 });
 
-app.get("/api/todos", (req, res) => {
-  res.json(todos);
-});
+app.use("/api/todos", todoRoutes);
 
-app.get("/api/todos/:id", (req, res) => {
-  const todo = todos.find((t) => t.id === Number(req.params.id));
-  if (!todo) return res.status(404).json({ error: "Todo not found" });
-  res.json(todo);
-});
+app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 
-app.post("/api/todos", (req, res) => {
-  const title = req.body?.title;
-  if (typeof title !== "string" || !title.trim()) {
-    return res.status(400).json({ error: "Title is required" });
-  }
-  const todo = { id: nextId++, title: title.trim(), completed: false };
-  todos.push(todo);
-  res.status(201).json(todo);
-});
-
-app.patch("/api/todos/:id", (req, res) => {
-  const todo = todos.find((t) => t.id === Number(req.params.id));
-  if (!todo) return res.status(404).json({ error: "Todo not found" });
-  if (req.body?.title !== undefined) todo.title = req.body.title;
-  if (req.body?.completed !== undefined) todo.completed = req.body.completed;
-  res.json(todo);
-});
-
-app.delete("/api/todos/:id", (req, res) => {
-  const before = todos.length;
-  todos = todos.filter((t) => t.id !== Number(req.params.id));
-  if (todos.length === before)
-    return res.status(404).json({ error: "Todo not found " });
-  res.status(204).end();
+app.use((err, req, res, next) => {
+  if (err.type === "entity.parse.failed")
+    return res.status(400).json({ error: "Invalid JSON body" });
+  if (err.status) return res.status(err.status).json({ error: err.message });
+  console.error(err);
+  res.status(500).json({ error: "Internal server error" });
 });
 
 app.listen(PORT, () => {
