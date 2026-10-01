@@ -3,6 +3,7 @@ import express from "express";
 import authRoutes from "./routes/auth.js";
 import todoRoutes from "./routes/todos.js";
 import { pool } from "./db/database.js";
+import cors from "cors";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET is missing. Add it to .env.");
@@ -11,7 +12,11 @@ if (!process.env.JWT_SECRET) {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors({ origin: process.env.CLIENT_ORIGIN || "http://localhost:5173" }));
 app.use(express.json());
+
+app.use("/api/auth", authRoutes);
+app.use("/api/todos", todoRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello from CodeBox!");
@@ -25,9 +30,6 @@ app.get("/api/health", async (req, res) => {
     res.status(500).json({ ok: false, db: "unreachable" });
   }
 });
-
-app.use("/api/auth", authRoutes);
-app.use("/api/todos", todoRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 
