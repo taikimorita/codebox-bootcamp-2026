@@ -1,20 +1,40 @@
 import { useEffect, useState } from "react";
-import { api } from "./api.js";
+import LoginPage from "./pages/LoginPage.jsx";
+import Button from "./components/Button.jsx";
+import { api, clearToken, getToken } from "./api.js";
 
 export default function App() {
-  const [status, setStatus] = useState("Checking…");
+  const [user, setUser] = useState(null);
+  const [checking, setChecking] = useState(Boolean(getToken()));
 
+  // If a token was saved last time, ask the backend who it belongs to
   useEffect(() => {
+    if (!getToken()) return;
     api
-      .health()
-      .then((data) => setStatus(`Backend says: db ${data.db}`))
-      .catch((err) => setStatus(`Error: ${err.message}`));
+      .me()
+      .then(({ user }) => setUser(user))
+      .catch(() => clearToken()) // expired or invalid, so throw it away
+      .finally(() => setChecking(false));
   }, []);
 
+  function logout() {
+    clearToken();
+    setUser(null);
+  }
+
+  if (checking)
+    return <p className="p-10 text-center text-sm text-zinc-500">Loading…</p>;
+  if (!user) return <LoginPage onAuthed={setUser} />;
+
+  // Temporary: replaced by the todo page in Part 3
   return (
     <main className="p-10">
-      <h1 className="text-2xl font-semibold text-emerald-400">CodeBox Todos</h1>
-      <p className="mt-2 text-zinc-400">{status}</p>
+      <p>
+        Logged in as <span className="text-emerald-400">{user.email}</span>
+      </p>
+      <Button variant="ghost" className="mt-4" onClick={logout}>
+        Log out
+      </Button>
     </main>
   );
 }
