@@ -1,13 +1,24 @@
+import "dotenv/config";
 import express from "express";
 import todoRoutes from "./routes/todos.js";
+import { pool } from "./db/database.js";
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Hello from CodeBox!");
+});
+
+app.get("/api/health", async (req, res) => {
+  try {
+    await pool.query("select 1");
+    res.json({ ok: true, db: "connected" });
+  } catch {
+    res.status(500).json({ ok: false, db: "unreachable" });
+  }
 });
 
 app.use("/api/todos", todoRoutes);

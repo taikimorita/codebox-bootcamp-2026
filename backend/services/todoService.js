@@ -1,20 +1,10 @@
+import { query } from "../db/database.js";
+
 export class HttpError extends Error {
   constructor(status, message) {
     super(message);
     this.status = status;
   }
-}
-
-let todos = [
-  { id: 1, title: "Buy milk", completed: false },
-  { id: 2, title: "Walk the dog", completed: true },
-];
-let nextId = 3;
-
-function findOrThrow(id) {
-  const todo = todos.find((t) => t.id === Number(id));
-  if (!todo) throw new HttpError(404, "Todo not found");
-  return todo;
 }
 
 function validateTitle(title) {
@@ -24,32 +14,54 @@ function validateTitle(title) {
   return title.trim();
 }
 
+function parseId(id) {
+  const n = Number(id);
+  if (!Number.isInteger(n) || n < 1)
+    throw new HttpError(400, "Invalid todo id");
+  return n;
+}
+
 export async function list() {
-  return todos;
+  const { rows } = await query("select * from todos order by created_at desc");
+  return rows;
 }
 
 export async function getOne(id) {
-  return findOrThrow(id);
+  const { rows } = await query("select * from todos where id = $1", [
+    parseId(id),
+  ]);
+  if (!rows[0]) throw new HttpError(404, "Todo not found");
+  return rows[0];
 }
 
 export async function create({ title }) {
-  const todo = { id: nextId++, title: validateTitle(title), completed: false };
-  todos.push(todo);
-  return todo;
+  const { rows } = await query(
+    "insert into todos (title) values ($1) returning *",
+    [validateTitle(title)],
+  );
+  return rows[0];
 }
 
 export async function update(id, body) {
-  const todo = findOrThrow(id);
-  if (body.title !== undefined) todo.title = validateTitle(body.title);
+  const todo = await getOne(id);
+  const title =
+    body.title !== undefined ? validateTitle(body.title) : todo.title;
+  let completed = todo.completed;
   if (body.completed !== undefined) {
     if (typeof body.completed !== "boolean")
       throw new HttpError(400, "completed must be true or false");
-    todo.completed = body.completed;
+    completed = body.completed;
   }
-  return todo;
+  const { rows } = await query(
+    "update todos set title = $1, completed = $2 where id = $3 returning *",
+    [title, completed, todo.id],
+  );
+  return rows[0];
 }
 
 export async function remove(id) {
-  findOrThrow(id);
-  todos = todos.filter((t) => t.id !== Number(id));
+  const { rowCount } = await query("delete from todos where id = $1", [
+    parseId(id),
+  ]);
+  if (rowCount === 0) throw new HttpError(404, "Todo not found");
 }

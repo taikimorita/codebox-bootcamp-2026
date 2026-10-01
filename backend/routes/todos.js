@@ -29,7 +29,7 @@ router.post(
 router.patch(
   "/:id",
   handle(async (req, res) => {
-    res.json(await todos.update(req.parans.id, req.body ?? {}));
+    res.json(await todos.update(req.params.id, req.body ?? {}));
   }),
 );
 
