@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import LoginPage from "./pages/LoginPage.jsx";
-import Button from "./components/Button.jsx";
+import TodosPage from "./pages/TodosPage.jsx";
 import { api, clearToken, getToken } from "./api.js";
 
 export default function App() {
@@ -26,15 +26,5 @@ export default function App() {
     return <p className="p-10 text-center text-sm text-zinc-500">Loading…</p>;
   if (!user) return <LoginPage onAuthed={setUser} />;
 
-  // Temporary: replaced by the todo page in Part 3
-  return (
-    <main className="p-10">
-      <p>
-        Logged in as <span className="text-emerald-400">{user.email}</span>
-      </p>
-      <Button variant="ghost" className="mt-4" onClick={logout}>
-        Log out
-      </Button>
-    </main>
-  );
+  return <TodosPage user={user} onLogout={logout} />;
 }
