@@ -1,7 +1,12 @@
 import "dotenv/config";
 import express from "express";
+import authRoutes from "./routes/auth.js";
 import todoRoutes from "./routes/todos.js";
 import { pool } from "./db/database.js";
+
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is missing. Add it to .env.");
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +26,7 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
