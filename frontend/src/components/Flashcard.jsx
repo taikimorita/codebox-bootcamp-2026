@@ -1,13 +1,18 @@
-export default function Flashcard({ card, revealed }) {
+import SpeakButton from "./SpeakButton.jsx";
+
+export default function Flashcard({ card, revealed, voice }) {
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center">
       <p className="mb-4 text-xs text-zinc-500">{card.deck_name}</p>
-      <p
-        lang={card.language_code}
-        className="text-4xl font-medium whitespace-pre-wrap"
-      >
-        {card.front}
-      </p>
+      <div className="flex items-start justify-center gap-2">
+        <p
+          lang={card.language_code}
+          className="text-4xl font-medium whitespace-pre-wrap"
+        >
+          {card.front}
+        </p>
+        <SpeakButton text={card.front} voice={voice} className="mt-1 text-lg" />
+      </div>
 
       {revealed && (
         <div className="mt-6 border-t border-zinc-800 pt-6">

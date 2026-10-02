@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Button from "./Button.jsx";
+import SpeakButton from "./SpeakButton.jsx";
 
 const fieldClass =
   "w-full rounded bg-zinc-800 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500";
@@ -11,7 +12,7 @@ const toDraft = (card) => ({
   notes: card.notes ?? "",
 });
 
-export default function CardRow({ card, lang, onUpdate, onDelete }) {
+export default function CardRow({ card, lang, voice, onUpdate, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(() => toDraft(card));
   const [saving, setSaving] = useState(false);
@@ -99,8 +100,11 @@ export default function CardRow({ card, lang, onUpdate, onDelete }) {
 
   return (
     <tr className="border-t border-zinc-800 align-top">
-      <td lang={lang} className="p-2 text-base whitespace-pre-wrap">
-        {card.front}
+      <td className="p-2 text-base">
+        <span lang={lang} className="whitespace-pre-wrap">
+          {card.front}
+        </span>
+        <SpeakButton text={card.front} voice={voice} className="ml-1 text-sm" />
       </td>
       <td lang={lang} className="p-2 whitespace-pre-wrap text-zinc-400">
         {card.reading || "—"}

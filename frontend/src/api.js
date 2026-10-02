@@ -50,6 +50,8 @@ export const api = {
   login: (email, password) =>
     request("/api/auth/login", { method: "POST", body: { email, password } }),
   me: () => request("/api/auth/me"),
+  getDashboard: (timeZone) =>
+    request(`/api/dashboard?tz=${encodeURIComponent(timeZone)}`),
   listLanguages: () => request("/api/languages"),
   getMyLanguages: () => request("/api/me/languages"),
   setMyLanguages: (codes) =>

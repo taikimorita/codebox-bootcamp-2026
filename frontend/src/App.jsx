@@ -156,7 +156,14 @@ export default function App() {
         >
           <Route
             path="/"
-            element={<DashboardPage languages={myLanguages} current={current} />}
+            element={
+              <DashboardPage
+                languages={myLanguages}
+                current={current}
+                onChangeLanguage={changeLanguage}
+                onLogout={logout}
+              />
+            }
           />
           <Route
             path="/decks"
@@ -194,7 +201,13 @@ export default function App() {
           />
           <Route
             path="/practice"
-            element={<PracticePage current={current} onLogout={logout} />}
+            element={
+              <PracticePage
+                languages={myLanguages}
+                current={current}
+                onLogout={logout}
+              />
+            }
           />
           <Route
             path="/todos"

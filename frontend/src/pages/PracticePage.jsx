@@ -5,9 +5,11 @@ import MultipleChoiceQuestion from "../components/MultipleChoiceQuestion.jsx";
 import PracticeResults from "../components/PracticeResults.jsx";
 import PracticeSetup from "../components/PracticeSetup.jsx";
 import TypingQuestion from "../components/TypingQuestion.jsx";
+import SpeakButton from "../components/SpeakButton.jsx";
 import { api } from "../api.js";
+import { localeFor, useVoice } from "../speech.js";
 
-export default function PracticePage({ current, onLogout }) {
+export default function PracticePage({ languages, current, onLogout }) {
   const [searchParams] = useSearchParams();
   const [decks, setDecks] = useState([]);
   const [status, setStatus] = useState("loading"); // loading | error | success (the deck list)
@@ -27,6 +29,9 @@ export default function PracticePage({ current, onLogout }) {
 
   const question = practice?.questions[index];
   const result = results[index] ?? null;
+  const voice = useVoice(
+    practice ? localeFor(languages, practice.deck.language_code) : null,
+  );
 
   useEffect(() => {
     let stale = false; // ignore an answer that arrives after this effect is replaced
@@ -164,9 +169,19 @@ export default function PracticePage({ current, onLogout }) {
         <>
           <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center">
             <p className="mb-4 text-xs text-zinc-500">{practice.deck.name}</p>
-            <p lang={lang} className="text-4xl font-medium whitespace-pre-wrap">
-              {question.front}
-            </p>
+            <div className="flex items-start justify-center gap-2">
+              <p
+                lang={lang}
+                className="text-4xl font-medium whitespace-pre-wrap"
+              >
+                {question.front}
+              </p>
+              <SpeakButton
+                text={question.front}
+                voice={voice}
+                className="mt-1 text-lg"
+              />
+            </div>
           </div>
 
           {/* key: a fresh, empty question each time */}

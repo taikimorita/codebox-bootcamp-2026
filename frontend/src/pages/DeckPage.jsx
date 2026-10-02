@@ -6,6 +6,7 @@ import CardRow from "../components/CardRow.jsx";
 import CsvImportPanel from "../components/CsvImportPanel.jsx";
 import DeckForm from "../components/DeckForm.jsx";
 import { api } from "../api.js";
+import { localeFor, useVoice } from "../speech.js";
 
 export default function DeckPage({ languages, onLogout }) {
   const { id } = useParams();
@@ -23,6 +24,8 @@ export default function DeckPage({ languages, onLogout }) {
   const [importBusy, setImportBusy] = useState(false);
   const [importError, setImportError] = useState("");
   const [notice, setNotice] = useState("");
+  // Looked up once here, not in every row (hooks must also run before the early returns below)
+  const voice = useVoice(deck ? localeFor(languages, deck.language_code) : null);
 
   useEffect(() => {
     let stale = false; // ignore an answer that arrives after this effect is replaced
@@ -269,6 +272,7 @@ export default function DeckPage({ languages, onLogout }) {
                   key={card.id}
                   card={card}
                   lang={deck.language_code}
+                  voice={voice}
                   onUpdate={updateCard}
                   onDelete={deleteCard}
                 />

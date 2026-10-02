@@ -4,6 +4,7 @@ import Button from "../components/Button.jsx";
 import Flashcard from "../components/Flashcard.jsx";
 import GradeButtons from "../components/GradeButtons.jsx";
 import { api } from "../api.js";
+import { localeFor, useVoice } from "../speech.js";
 
 export default function StudyPage({ languages, current, onLogout }) {
   const [cards, setCards] = useState([]); // the batch the server sent, first one is showing
@@ -16,6 +17,7 @@ export default function StudyPage({ languages, current, onLogout }) {
   const [reviewed, setReviewed] = useState(0);
   const card = cards[0];
   const language = languages.find((l) => l.code === current);
+  const voice = useVoice(localeFor(languages, current));
 
   useEffect(() => {
     let stale = false; // ignore an answer that arrives after this effect is replaced
@@ -136,7 +138,7 @@ export default function StudyPage({ languages, current, onLogout }) {
 
       {status === "success" && card && (
         <>
-          <Flashcard card={card} revealed={revealed} />
+          <Flashcard card={card} revealed={revealed} voice={voice} />
 
           <div className="mt-6">
             {revealed ? (
