@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Button from "../components/Button.jsx";
 import LanguageCard from "../components/LanguageCard.jsx";
+import Page from "../components/Page.jsx";
+import { ErrorState, InlineError, Skeleton } from "../components/States.jsx";
 import { api } from "../api.js";
 
 export default function OnboardingPage({ selected, onSaved, onLogout }) {
@@ -65,66 +67,73 @@ export default function OnboardingPage({ selected, onSaved, onLogout }) {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-semibold">
-        {isFirstTime ? "What are you studying?" : "Your study languages"}
-      </h1>
-      <p className="mt-1 mb-6 text-sm text-zinc-400">
-        Pick one or more. You can change this any time.
-      </p>
+    <Page>
+      <div className="mx-auto max-w-2xl">
+        <h1 className="text-3xl font-semibold tracking-tight">
+          {isFirstTime ? "What are you studying?" : "Your study languages"}
+        </h1>
+        <p className="mt-2 mb-8 text-muted">
+          Pick one or more. You can change this any time.
+        </p>
 
-      {status === "loading" && (
-        <p className="py-8 text-center text-sm text-zinc-500">Loading…</p>
-      )}
-
-      {status === "error" && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm">
-          <p className="text-red-300">{error}</p>
-          <Button variant="ghost" className="mt-2" onClick={retry}>
-            Try again
-          </Button>
-        </div>
-      )}
-
-      {status === "success" && (
-        <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {languages.map((l) => (
-              <LanguageCard
-                key={l.code}
-                language={l}
-                selected={picked.has(l.code)}
-                onToggle={() => toggle(l.code)}
-              />
+        {status === "loading" && (
+          <div
+            role="status"
+            aria-label="Loading"
+            className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+          >
+            {Array.from({ length: 6 }, (_, i) => (
+              <Skeleton key={i} className="h-24" />
             ))}
           </div>
+        )}
 
-          {error && (
-            <p role="alert" className="mt-4 text-sm text-red-400">
-              {error}
-            </p>
-          )}
+        {status === "error" && <ErrorState message={error} onRetry={retry} />}
 
-          <div className="mt-6 flex items-center gap-3">
-            <Button onClick={save} disabled={saving || picked.size === 0}>
-              {saving ? "Saving…" : "Save"}
-            </Button>
-            <span className="text-sm text-zinc-500">
-              {picked.size === 0
-                ? "Pick at least one"
-                : `${picked.size} selected`}
-            </span>
-            {!isFirstTime && (
-              <Link
-                to="/"
-                className="ml-auto text-sm text-zinc-400 hover:text-zinc-100"
+        {status === "success" && (
+          <>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {languages.map((l) => (
+                <LanguageCard
+                  key={l.code}
+                  language={l}
+                  selected={picked.has(l.code)}
+                  onToggle={() => toggle(l.code)}
+                />
+              ))}
+            </div>
+
+            <InlineError className="mt-4">{error}</InlineError>
+
+            <div className="mt-8 flex items-center gap-3">
+              <Button
+                size="lg"
+                onClick={save}
+                disabled={saving || picked.size === 0}
               >
-                Cancel
-              </Link>
-            )}
-          </div>
-        </>
-      )}
-    </main>
+                {saving
+                  ? "Saving…"
+                  : isFirstTime
+                    ? "Start studying"
+                    : "Save"}
+              </Button>
+              <span className="text-sm text-subtle">
+                {picked.size === 0
+                  ? "Pick at least one"
+                  : `${picked.size} selected`}
+              </span>
+              {!isFirstTime && (
+                <Link
+                  to="/"
+                  className="ml-auto text-sm text-muted hover:text-fg"
+                >
+                  Cancel
+                </Link>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </Page>
   );
 }

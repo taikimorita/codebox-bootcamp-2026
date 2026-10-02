@@ -1,7 +1,108 @@
 @import "tailwindcss";
 
+/*
+  Theme colours. Components use these names (bg-surface, text-muted, border-line, ...)
+  instead of fixed colours, so light and dark mode are just two sets of values below.
+  <html data-theme="light|dark"> is set by the script in index.html and by ThemeToggle.
+*/
+:root {
+  color-scheme: light;
+  --bg: #f7f7f8;
+  --surface: #ffffff;
+  --surface-2: #f0f0f2;
+  --line: #e4e4e7;
+  --line-strong: #c9c9cf;
+  --fg: #18181b;
+  --muted: #52525b;
+  --subtle: #6b6b73;
+  --accent: #047857; /* emerald-700: white text on it stays readable */
+  --on-accent: #ffffff;
+  --accent-ink: #047857;
+  --danger: #dc2626;
+  --danger-ink: #b91c1c;
+  --warn: #d97706;
+  --warn-ink: #a84d08;
+  --info: #0284c7;
+  --info-ink: #0369a1;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #09090b;
+  --surface: #18181b;
+  --surface-2: #27272a;
+  --line: #27272a;
+  --line-strong: #3f3f46;
+  --fg: #f4f4f5;
+  --muted: #a1a1aa;
+  --subtle: #919199;
+  --accent: #10b981;
+  --on-accent: #09090b;
+  --accent-ink: #34d399;
+  --danger: #ef4444;
+  --danger-ink: #f87171;
+  --warn: #f59e0b;
+  --warn-ink: #fcd34d;
+  --info: #0ea5e9;
+  --info-ink: #7dd3fc;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-danger: var(--danger);
+  --color-danger-ink: var(--danger-ink);
+  --color-warn: var(--warn);
+  --color-warn-ink: var(--warn-ink);
+  --color-info: var(--info);
+  --color-info-ink: var(--info-ink);
+}
+
+@theme {
+  /* Noto Sans for Latin and Cyrillic, so it matches the Noto CJK fonts below */
+  --font-sans: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Feedback animations for practice answers */
+  --animate-pop: pop 0.25s ease-out;
+  --animate-shake: shake 0.35s ease-in-out;
+  --animate-fade-in: fade-in 0.2s ease-out;
+
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
 body {
-  @apply bg-zinc-950 text-zinc-100 antialiased;
+  @apply bg-bg text-fg antialiased;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* Respect "reduce motion": no flips, shakes or fades */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /*

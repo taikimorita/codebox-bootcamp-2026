@@ -1,8 +1,17 @@
+import { FileUp, Layers, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Button from "../components/Button.jsx";
 import DeckForm from "../components/DeckForm.jsx";
+import IconButton from "../components/IconButton.jsx";
+import Page, { PageHeader } from "../components/Page.jsx";
+import {
+  EmptyState,
+  ErrorState,
+  InlineError,
+  LoadingRows,
+} from "../components/States.jsx";
 import { api } from "../api.js";
+import { cardClass } from "../styles.js";
 
 // [{ code, name, native_name, decks: [...] }], current language first
 function groupByLanguage(decks, current) {
@@ -90,88 +99,89 @@ export default function DecksPage({ languages, current, onLogout }) {
   const groups = groupByLanguage(decks, current);
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Decks</h1>
+    <Page>
+      <PageHeader title="Decks" subtitle="Your flashcards, grouped by language.">
         <Link
           to="/import"
-          className="rounded-lg px-3 py-2 text-sm font-medium text-emerald-400 hover:bg-zinc-800"
+          className="inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-3.5 py-2 text-sm font-medium transition hover:bg-surface-2"
         >
+          <FileUp className="size-4" aria-hidden="true" />
           Import from Anki
         </Link>
-      </header>
+      </PageHeader>
 
-      {/* key: start the form over with the new default when the language changes */}
-      <DeckForm
-        key={current}
-        languages={languages}
-        initialLanguage={current}
-        onSubmit={addDeck}
-      />
+      <div className={`p-4 ${cardClass}`}>
+        <p className="mb-3 text-sm font-medium">New deck</p>
+        {/* key: start the form over with the new default when the language changes */}
+        <DeckForm
+          key={current}
+          languages={languages}
+          initialLanguage={current}
+          onSubmit={addDeck}
+        />
+      </div>
 
-      {error && status !== "error" && (
-        <p role="alert" className="mt-3 text-sm text-red-400">
-          {error}
-        </p>
-      )}
+      {status !== "error" && <InlineError className="mt-3">{error}</InlineError>}
 
-      {status === "loading" && (
-        <p className="py-8 text-center text-sm text-zinc-500">Loading…</p>
-      )}
+      <div className="mt-8">
+        {status === "loading" && (
+          <LoadingRows rows={4} rowClassName="h-20" />
+        )}
 
-      {status === "error" && (
-        <div className="mt-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm">
-          <p className="text-red-300">{error}</p>
-          <Button variant="ghost" className="mt-2" onClick={retry}>
-            Try again
-          </Button>
-        </div>
-      )}
+        {status === "error" && <ErrorState message={error} onRetry={retry} />}
 
-      {status === "success" && decks.length === 0 && (
-        <p className="py-8 text-center text-sm text-zinc-500">
-          No decks yet — create your first one above.
-        </p>
-      )}
+        {status === "success" && decks.length === 0 && (
+          <EmptyState icon={Layers} title="No decks yet">
+            Create your first one above, or import a deck from Anki.
+          </EmptyState>
+        )}
 
-      {status === "success" &&
-        groups.map((g) => (
-          <section key={g.code} className="mt-8">
-            <h2 className="mb-2 text-sm font-medium text-zinc-400">
-              <span lang={g.code} className="text-base text-zinc-100">
-                {g.native_name}
-              </span>{" "}
-              {g.name}
-            </h2>
-            <ul className="space-y-2">
-              {g.decks.map((deck) => (
-                <li
-                  key={deck.id}
-                  className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2"
-                >
-                  <Link
-                    to={`/decks/${deck.id}`}
-                    className="flex-1 text-sm hover:text-emerald-400"
+        {status === "success" &&
+          groups.map((g) => (
+            <section key={g.code} className="mb-8">
+              <h2 className="mb-3 flex items-baseline gap-2">
+                <span lang={g.code} className="text-lg font-semibold">
+                  {g.native_name}
+                </span>
+                <span className="text-sm text-subtle">{g.name}</span>
+              </h2>
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {g.decks.map((deck) => (
+                  <li
+                    key={deck.id}
+                    className={`group relative flex items-center gap-3 p-4 transition hover:border-accent/50 hover:shadow-sm ${cardClass}`}
                   >
-                    {deck.name}
-                  </Link>
-                  <span className="text-xs text-zinc-500">
-                    {deck.card_count === 1
-                      ? "1 card"
-                      : `${deck.card_count} cards`}
-                  </span>
-                  <Button
-                    variant="danger"
-                    onClick={() => deleteDeck(deck)}
-                    aria-label={`Delete deck "${deck.name}"`}
-                  >
-                    Delete
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
-    </main>
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent-ink">
+                      <Layers className="size-5" aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      {/* The link's ::after covers the whole card, so the card is clickable */}
+                      <Link
+                        to={`/decks/${deck.id}`}
+                        className="block truncate font-medium after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-accent"
+                      >
+                        {deck.name}
+                      </Link>
+                      <p className="text-xs text-subtle">
+                        {deck.card_count === 1
+                          ? "1 card"
+                          : `${deck.card_count} cards`}
+                        {deck.source !== "manual" && ` · from ${deck.source.toUpperCase()}`}
+                      </p>
+                    </div>
+                    <IconButton
+                      icon={Trash2}
+                      variant="danger"
+                      label={`Delete deck "${deck.name}"`}
+                      onClick={() => deleteDeck(deck)}
+                      className="relative z-10 opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+      </div>
+    </Page>
   );
 }

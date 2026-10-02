@@ -1,6 +1,10 @@
+import { X } from "lucide-react";
+import { cardClass } from "../styles.js";
 import Button from "./Button.jsx";
 import FileDrop from "./FileDrop.jsx";
+import IconButton from "./IconButton.jsx";
 import ImportPreview from "./ImportPreview.jsx";
+import { InlineError } from "./States.jsx";
 
 export default function CsvImportPanel({
   file,
@@ -13,13 +17,16 @@ export default function CsvImportPanel({
   onCancel,
 }) {
   return (
-    <section className="mb-6 space-y-4 rounded-xl border border-zinc-800 p-4">
-      <div>
-        <h2 className="font-medium">Import from CSV</h2>
-        <p className="mt-1 text-xs text-zinc-500">
-          Columns: front, back, and an optional reading. Comma or tab
-          separated. From Anki: File → Export → “Notes in Plain Text”.
-        </p>
+    <section className={`mb-6 animate-fade-in space-y-4 p-5 ${cardClass}`}>
+      <div className="flex items-start gap-3">
+        <div className="flex-1">
+          <h2 className="font-semibold">Import from CSV</h2>
+          <p className="mt-1 text-xs text-subtle">
+            Columns: front, back, and an optional reading. Comma or tab
+            separated. From Anki: File → Export → “Notes in Plain Text”.
+          </p>
+        </div>
+        <IconButton icon={X} label="Close import" onClick={onCancel} disabled={busy} />
       </div>
 
       <FileDrop
@@ -31,16 +38,14 @@ export default function CsvImportPanel({
       />
 
       {busy && !preview && (
-        <p className="text-sm text-zinc-500">Reading the file…</p>
+        <p role="status" className="animate-pulse text-sm text-subtle">
+          Reading the file…
+        </p>
       )}
 
       {preview && <ImportPreview result={preview} lang={lang} />}
 
-      {error && (
-        <p role="alert" className="text-sm text-red-400">
-          {error}
-        </p>
-      )}
+      <InlineError>{error}</InlineError>
 
       <div className="flex gap-2">
         <Button

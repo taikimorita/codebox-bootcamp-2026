@@ -1,4 +1,6 @@
+import { Plus } from "lucide-react";
 import { useState } from "react";
+import { fieldBase } from "../styles.js";
 import Button from "./Button.jsx";
 
 export default function TodoForm({ languages, defaultLanguage, onAdd }) {
@@ -19,20 +21,20 @@ export default function TodoForm({ languages, defaultLanguage, onAdd }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="flex flex-wrap gap-2">
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="What needs doing?"
         maxLength={200}
         aria-label="New todo"
-        className="flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm placeholder:text-zinc-500 focus:border-emerald-500 focus:outline-none"
+        className={`${fieldBase} min-w-48 flex-1 border-line bg-surface px-3 py-2 text-sm`}
       />
       <select
         value={language}
         onChange={(e) => setLanguage(e.target.value)}
         aria-label="Language for new todo"
-        className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 text-sm focus:border-emerald-500 focus:outline-none"
+        className={`${fieldBase} border-line bg-surface px-3 py-2 text-sm`}
       >
         <option value="">No language</option>
         {languages.map((l) => (
@@ -42,6 +44,7 @@ export default function TodoForm({ languages, defaultLanguage, onAdd }) {
         ))}
       </select>
       <Button type="submit" disabled={saving || !title.trim()}>
+        <Plus className="size-4" aria-hidden="true" />
         {saving ? "Adding…" : "Add"}
       </Button>
     </form>

@@ -1,10 +1,9 @@
+import { Plus } from "lucide-react";
 import { useRef, useState } from "react";
+import { cardClass, inputClass } from "../styles.js";
 import Button from "./Button.jsx";
 
 const EMPTY = { front: "", reading: "", back: "", notes: "" };
-
-const inputClass =
-  "w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm placeholder:text-zinc-500 focus:border-emerald-500 focus:outline-none";
 
 export default function CardForm({ lang, onAdd }) {
   const [card, setCard] = useState(EMPTY);
@@ -31,8 +30,9 @@ export default function CardForm({ lang, onAdd }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="grid gap-2 rounded-xl border border-zinc-800 p-3 sm:grid-cols-2"
+      className={`grid gap-3 p-4 sm:grid-cols-2 ${cardClass}`}
     >
+      <p className="text-sm font-medium sm:col-span-2">Add a card</p>
       <input
         ref={frontRef}
         lang={lang}
@@ -72,6 +72,7 @@ export default function CardForm({ lang, onAdd }) {
       />
       <div className="sm:col-span-2">
         <Button type="submit" disabled={saving || !canSave}>
+          <Plus className="size-4" aria-hidden="true" />
           {saving ? "Adding…" : "Add card"}
         </Button>
       </div>

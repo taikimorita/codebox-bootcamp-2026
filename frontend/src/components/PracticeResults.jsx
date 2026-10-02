@@ -1,4 +1,13 @@
+import { RotateCcw, Settings2 } from "lucide-react";
+import { cardClass } from "../styles.js";
 import Button from "./Button.jsx";
+
+function scoreMessage(percent) {
+  if (percent === 100) return "Perfect round!";
+  if (percent >= 80) return "Great work.";
+  if (percent >= 50) return "Getting there.";
+  return "These need more practice.";
+}
 
 // results: [{ front, given, correct, expected, reading }]
 export default function PracticeResults({ results, lang, onAgain, onSetup }) {
@@ -7,51 +16,64 @@ export default function PracticeResults({ results, lang, onAgain, onSetup }) {
   const percent = Math.round((score / results.length) * 100);
 
   return (
-    <div>
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center">
-        <p className="text-4xl font-semibold">
-          {score} / {results.length}
+    <div className="animate-fade-in space-y-6">
+      <div className={`flex flex-col items-center p-8 text-center ${cardClass}`}>
+        {/* A ring that fills to the score */}
+        <div
+          className="grid size-32 place-items-center rounded-full"
+          style={{
+            background: `conic-gradient(var(--accent) ${percent}%, var(--surface-2) 0)`,
+          }}
+        >
+          <div className="grid size-26 place-items-center rounded-full bg-surface">
+            <span className="text-3xl font-semibold tabular-nums">
+              {percent}%
+            </span>
+          </div>
+        </div>
+        <p className="mt-4 text-lg font-semibold">{scoreMessage(percent)}</p>
+        <p className="text-sm text-muted">
+          {score} of {results.length} correct
         </p>
-        <p className="mt-1 text-sm text-zinc-400">{percent}% correct</p>
+        <div className="mt-6 flex gap-2">
+          <Button onClick={onAgain}>
+            <RotateCcw className="size-4" aria-hidden="true" />
+            Practice again
+          </Button>
+          <Button variant="secondary" onClick={onSetup}>
+            <Settings2 className="size-4" aria-hidden="true" />
+            Change settings
+          </Button>
+        </div>
       </div>
 
       {missed.length > 0 && (
-        <section className="mt-6">
-          <h2 className="mb-2 text-sm font-medium text-zinc-400">
+        <section>
+          <h2 className="mb-3 text-sm font-semibold text-muted">
             Cards you missed
           </h2>
-          <ul className="space-y-2">
+          <ul className={`divide-y divide-line ${cardClass}`}>
             {missed.map((r, i) => (
-              <li
-                key={i}
-                className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm"
-              >
-                <p lang={lang} className="text-base whitespace-pre-wrap">
+              <li key={i} className="px-4 py-3 text-sm">
+                <p lang={lang} className="text-lg font-medium whitespace-pre-wrap">
                   {r.front}
                 </p>
-                <p className="mt-1 text-emerald-300 whitespace-pre-wrap">
+                <p className="mt-1 whitespace-pre-wrap text-accent-ink">
                   {r.expected}
                   {r.reading && (
-                    <span lang={lang} className="ml-2 text-zinc-400">
+                    <span lang={lang} className="ml-2 text-muted">
                       {r.reading}
                     </span>
                   )}
                 </p>
-                <p className="text-red-300 whitespace-pre-wrap">
-                  You answered: {r.given}
+                <p className="whitespace-pre-wrap text-subtle">
+                  You answered: <span className="text-danger-ink">{r.given}</span>
                 </p>
               </li>
             ))}
           </ul>
         </section>
       )}
-
-      <div className="mt-6 flex gap-2">
-        <Button onClick={onAgain}>Practice again</Button>
-        <Button variant="ghost" onClick={onSetup}>
-          Change settings
-        </Button>
-      </div>
     </div>
   );
 }

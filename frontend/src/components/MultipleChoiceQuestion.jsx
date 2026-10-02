@@ -1,3 +1,5 @@
+import { CircleCheck, CircleX } from "lucide-react";
+
 // result: null until answered, then { given, correct, expected }
 export default function MultipleChoiceQuestion({
   question,
@@ -5,29 +7,44 @@ export default function MultipleChoiceQuestion({
   disabled,
   onAnswer,
 }) {
-  function optionClass(option) {
-    if (!result)
-      return "border-zinc-800 bg-zinc-900 hover:border-zinc-600";
-    if (option === result.expected)
-      return "border-emerald-500 bg-emerald-500/10 text-emerald-200";
-    if (option === result.given)
-      return "border-red-500 bg-red-500/10 text-red-200";
-    return "border-zinc-800 bg-zinc-900 opacity-50";
+  function optionState(option) {
+    if (!result) return "idle";
+    if (option === result.expected) return "right";
+    if (option === result.given) return "wrong";
+    return "other";
   }
+
+  const styles = {
+    idle: "border-line bg-surface hover:border-accent/50 hover:bg-accent/5",
+    right: "animate-pop border-accent bg-accent/10 text-accent-ink",
+    wrong: "animate-shake border-danger bg-danger/10 text-danger-ink",
+    other: "border-line bg-surface opacity-50",
+  };
 
   return (
     <div className="grid gap-2 sm:grid-cols-2">
-      {question.options.map((option, i) => (
-        <button
-          key={option}
-          onClick={() => onAnswer(option)}
-          disabled={disabled || Boolean(result)}
-          className={`flex items-start gap-2 rounded-lg border px-3 py-3 text-left text-sm whitespace-pre-wrap transition focus-visible:outline-2 focus-visible:outline-emerald-400 disabled:cursor-default ${optionClass(option)}`}
-        >
-          <kbd className="text-xs text-zinc-500">{i + 1}</kbd>
-          <span>{option}</span>
-        </button>
-      ))}
+      {question.options.map((option, i) => {
+        const state = optionState(option);
+        return (
+          <button
+            key={option}
+            onClick={() => onAnswer(option)}
+            disabled={disabled || Boolean(result)}
+            className={`flex items-center gap-3 rounded-xl border px-4 py-3.5 text-left text-sm transition focus-visible:outline-2 focus-visible:outline-accent disabled:cursor-default ${styles[state]}`}
+          >
+            <kbd className="grid size-6 shrink-0 place-items-center rounded-md bg-surface-2 font-sans text-xs text-muted">
+              {i + 1}
+            </kbd>
+            <span className="flex-1 whitespace-pre-wrap">{option}</span>
+            {state === "right" && (
+              <CircleCheck className="size-5 shrink-0" aria-label="Correct" />
+            )}
+            {state === "wrong" && (
+              <CircleX className="size-5 shrink-0" aria-label="Your answer" />
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }

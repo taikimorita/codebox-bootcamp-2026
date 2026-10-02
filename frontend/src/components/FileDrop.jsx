@@ -1,3 +1,4 @@
+import { FileUp } from "lucide-react";
 import { useState } from "react";
 
 // A drop zone that is also a normal file picker (click or keyboard)
@@ -19,7 +20,7 @@ export default function FileDrop({ accept, label, hint, disabled, onFile }) {
       }}
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
-      className={`block cursor-pointer rounded-xl border-2 border-dashed px-4 py-8 text-center transition focus-within:border-emerald-500 ${dragging ? "border-emerald-500 bg-emerald-500/10" : "border-zinc-700 hover:border-zinc-500"} ${disabled ? "pointer-events-none opacity-50" : ""}`}
+      className={`flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed px-4 py-10 text-center transition focus-within:border-accent ${dragging ? "border-accent bg-accent/10" : "border-line-strong hover:border-accent/60 hover:bg-accent/5"} ${disabled ? "pointer-events-none opacity-50" : ""}`}
     >
       <input
         type="file"
@@ -32,8 +33,11 @@ export default function FileDrop({ accept, label, hint, disabled, onFile }) {
         }}
         className="sr-only"
       />
-      <span className="block text-sm">{label}</span>
-      {hint && <span className="mt-1 block text-xs text-zinc-500">{hint}</span>}
+      <span className="mb-3 grid size-11 place-items-center rounded-full bg-accent/10 text-accent-ink">
+        <FileUp className="size-5" aria-hidden="true" />
+      </span>
+      <span className="block text-sm font-medium">{label}</span>
+      {hint && <span className="mt-1 block text-xs text-subtle">{hint}</span>}
     </label>
   );
 }

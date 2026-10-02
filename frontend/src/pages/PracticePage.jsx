@@ -1,13 +1,22 @@
+import { ArrowRight, CircleCheck, CircleX, Layers } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Button from "../components/Button.jsx";
 import MultipleChoiceQuestion from "../components/MultipleChoiceQuestion.jsx";
+import Page from "../components/Page.jsx";
 import PracticeResults from "../components/PracticeResults.jsx";
 import PracticeSetup from "../components/PracticeSetup.jsx";
-import TypingQuestion from "../components/TypingQuestion.jsx";
 import SpeakButton from "../components/SpeakButton.jsx";
+import {
+  EmptyState,
+  ErrorState,
+  InlineError,
+  Skeleton,
+} from "../components/States.jsx";
+import TypingQuestion from "../components/TypingQuestion.jsx";
 import { api } from "../api.js";
 import { localeFor, useVoice } from "../speech.js";
+import { cardClass, textLinkClass } from "../styles.js";
 
 export default function PracticePage({ languages, current, onLogout }) {
   const [searchParams] = useSearchParams();
@@ -114,38 +123,53 @@ export default function PracticePage({ languages, current, onLogout }) {
   });
 
   const lang = practice?.deck.language_code;
+  const total = practice?.questions.length ?? 0;
+  // Answered questions count as done, so the bar moves as soon as you answer
+  const progress = total ? results.length / total : 0;
 
   return (
-    <main className="mx-auto max-w-xl px-4 py-10">
-      <header className="mb-6 flex items-baseline justify-between">
-        <h1 className="text-2xl font-semibold">Practice</h1>
+    <Page narrow>
+      <header className="mb-6">
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-2xl font-semibold tracking-tight">Practice</h1>
+          {phase === "question" && (
+            <span className="text-sm text-muted tabular-nums">
+              {index + 1} / {total}
+            </span>
+          )}
+        </div>
         {phase === "question" && (
-          <span className="text-sm text-zinc-500">
-            {index + 1} / {practice.questions.length}
-          </span>
+          <div
+            role="progressbar"
+            aria-label="Practice progress"
+            aria-valuenow={Math.round(progress * 100)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-2"
+          >
+            <div
+              className="h-full rounded-full bg-accent transition-[width] duration-300"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
         )}
       </header>
 
       {phase === "setup" && status === "loading" && (
-        <p className="py-16 text-center text-sm text-zinc-500">Loading…</p>
+        <Skeleton className="h-96" />
       )}
 
       {phase === "setup" && status === "error" && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm">
-          <p className="text-red-300">{error}</p>
-          <Button variant="ghost" className="mt-2" onClick={retry}>
-            Try again
-          </Button>
-        </div>
+        <ErrorState message={error} onRetry={retry} />
       )}
 
       {phase === "setup" && status === "success" && decks.length === 0 && (
-        <p className="py-16 text-center text-sm text-zinc-500">
-          You don't have any decks yet.{" "}
-          <Link to="/decks" className="text-emerald-400">
-            Create one first.
-          </Link>
-        </p>
+        <EmptyState icon={Layers} title="No decks yet">
+          <Link to="/decks" className={textLinkClass}>
+            Create a deck
+          </Link>{" "}
+          to start practising.
+        </EmptyState>
       )}
 
       {phase === "setup" && status === "success" && decks.length > 0 && (
@@ -157,31 +181,25 @@ export default function PracticePage({ languages, current, onLogout }) {
             starting={starting}
             onStart={start}
           />
-          {error && (
-            <p role="alert" className="mt-3 text-sm text-red-400">
-              {error}
-            </p>
-          )}
+          <InlineError className="mt-3">{error}</InlineError>
         </>
       )}
 
       {phase === "question" && question && (
         <>
-          <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center">
-            <p className="mb-4 text-xs text-zinc-500">{practice.deck.name}</p>
-            <div className="flex items-start justify-center gap-2">
-              <p
-                lang={lang}
-                className="text-4xl font-medium whitespace-pre-wrap"
-              >
-                {question.front}
-              </p>
-              <SpeakButton
-                text={question.front}
-                voice={voice}
-                className="mt-1 text-lg"
-              />
-            </div>
+          <div
+            className={`mb-6 flex min-h-48 flex-col items-center justify-center p-8 text-center shadow-sm ${cardClass}`}
+          >
+            <p className="mb-5 rounded-full bg-surface-2 px-2.5 py-0.5 text-xs text-muted">
+              {practice.deck.name}
+            </p>
+            <p
+              lang={lang}
+              className="text-4xl font-medium break-words whitespace-pre-wrap sm:text-5xl"
+            >
+              {question.front}
+            </p>
+            <SpeakButton text={question.front} voice={voice} className="mt-3" />
           </div>
 
           {/* key: a fresh, empty question each time */}
@@ -202,32 +220,43 @@ export default function PracticePage({ languages, current, onLogout }) {
             />
           )}
 
-          {error && (
-            <p role="alert" className="mt-3 text-sm text-red-400">
-              {error}
-            </p>
-          )}
+          <InlineError className="mt-3">{error}</InlineError>
 
           {result && (
-            <div className="mt-4 flex items-center gap-3">
-              <p
-                className={`flex-1 text-sm ${result.correct ? "text-emerald-300" : "text-red-300"}`}
-              >
-                {result.correct ? "Correct!" : "Not quite."}
+            <div
+              className={`mt-4 flex animate-fade-in items-center gap-3 rounded-xl border p-4 ${result.correct ? "border-accent/30 bg-accent/5" : "border-danger/30 bg-danger/5"}`}
+            >
+              {result.correct ? (
+                <CircleCheck
+                  className="size-6 shrink-0 text-accent-ink"
+                  aria-hidden="true"
+                />
+              ) : (
+                <CircleX
+                  className="size-6 shrink-0 text-danger-ink"
+                  aria-hidden="true"
+                />
+              )}
+              <div className="min-w-0 flex-1 text-sm">
+                <p
+                  className={`font-semibold ${result.correct ? "text-accent-ink" : "text-danger-ink"}`}
+                >
+                  {result.correct ? "Correct!" : "Not quite"}
+                </p>
                 {(!result.correct || practice.type === "typing") && (
-                  <>
-                    {" "}
-                    <span className="text-zinc-300">{result.expected}</span>
+                  <p className="whitespace-pre-wrap">
+                    {result.expected}
                     {result.reading && (
-                      <span lang={lang} className="ml-2 text-zinc-400">
+                      <span lang={lang} className="ml-2 text-muted">
                         {result.reading}
                       </span>
                     )}
-                  </>
+                  </p>
                 )}
-              </p>
+              </div>
               <Button autoFocus onClick={next}>
-                {index + 1 < practice.questions.length ? "Next" : "See results"}
+                {index + 1 < total ? "Next" : "See results"}
+                <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             </div>
           )}
@@ -242,6 +271,6 @@ export default function PracticePage({ languages, current, onLogout }) {
           onSetup={() => setPhase("setup")}
         />
       )}
-    </main>
+    </Page>
   );
 }
