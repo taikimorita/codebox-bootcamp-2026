@@ -76,4 +76,11 @@ export const api = {
   updateCard: (id, changes) =>
     request(`/api/cards/${id}`, { method: "PATCH", body: changes }),
   deleteCard: (id) => request(`/api/cards/${id}`, { method: "DELETE" }),
+  getStudyQueue: (language) =>
+    request(`/api/study/queue?language=${encodeURIComponent(language)}`),
+  reviewCard: (id, grade, mode) =>
+    request(`/api/cards/${id}/review`, {
+      method: "POST",
+      body: { grade, mode },
+    }),
 };

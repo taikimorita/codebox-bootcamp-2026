@@ -19,6 +19,9 @@ export default function DashboardPage({ languages, current }) {
         Reviews and streaks will show up here in later stages.
       </p>
       <div className="mt-6 flex gap-6 text-sm">
+        <Link to="/study" className="text-emerald-400 hover:text-emerald-300">
+          Study now →
+        </Link>
         <Link to="/decks" className="text-emerald-400 hover:text-emerald-300">
           Your decks →
         </Link>

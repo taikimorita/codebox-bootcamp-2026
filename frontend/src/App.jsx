@@ -7,6 +7,7 @@ import DeckPage from "./pages/DeckPage.jsx";
 import DecksPage from "./pages/DecksPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
+import StudyPage from "./pages/StudyPage.jsx";
 import TodosPage from "./pages/TodosPage.jsx";
 import { api, clearToken, getToken } from "./api.js";
 
@@ -168,6 +169,16 @@ export default function App() {
           <Route
             path="/decks/:id"
             element={<DeckPage languages={myLanguages} onLogout={logout} />}
+          />
+          <Route
+            path="/study"
+            element={
+              <StudyPage
+                languages={myLanguages}
+                current={current}
+                onLogout={logout}
+              />
+            }
           />
           <Route
             path="/todos"

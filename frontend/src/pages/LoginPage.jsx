@@ -34,7 +34,7 @@ export default function LoginPage({ onAuthed }) {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
-      <h1 className="text-2xl font-semibold">Kotoba</h1>
+      <h1 className="text-2xl font-semibold">Kioku</h1>
       <p className="mt-1 mb-6 text-sm text-zinc-400">
         {mode === "login"
           ? "Log in to keep studying."
