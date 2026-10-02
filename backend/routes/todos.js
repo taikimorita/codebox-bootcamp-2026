@@ -10,7 +10,7 @@ const handle = (fn) => (req, res, next) => fn(req, res).catch(next);
 router.get(
   "/",
   handle(async (req, res) => {
-    res.json(await todos.list(req.userId));
+    res.json(await todos.list(req.userId, req.query.language));
   }),
 );
 

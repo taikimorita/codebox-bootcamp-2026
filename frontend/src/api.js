@@ -48,9 +48,18 @@ export const api = {
   login: (email, password) =>
     request("/api/auth/login", { method: "POST", body: { email, password } }),
   me: () => request("/api/auth/me"),
-  listTodos: () => request("/api/todos"),
-  createTodo: (title) =>
-    request("/api/todos", { method: "POST", body: { title } }),
+  listLanguages: () => request("/api/languages"),
+  getMyLanguages: () => request("/api/me/languages"),
+  setMyLanguages: (codes) =>
+    request("/api/me/languages", { method: "PUT", body: { codes } }),
+  listTodos: (language) =>
+    request(
+      language
+        ? `/api/todos?language=${encodeURIComponent(language)}`
+        : "/api/todos",
+    ),
+  createTodo: (title, language_code) =>
+    request("/api/todos", { method: "POST", body: { title, language_code } }),
   updateTodo: (id, changes) =>
     request(`/api/todos/${id}`, { method: "PATCH", body: changes }),
   deleteTodo: (id) => request(`/api/todos/${id}`, { method: "DELETE" }),

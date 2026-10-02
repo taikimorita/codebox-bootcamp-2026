@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import authRoutes from "./routes/auth.js";
 import todoRoutes from "./routes/todos.js";
+import languageRoutes from "./routes/languages.js";
+import meRoutes from "./routes/me.js";
 import { pool } from "./db/database.js";
 import cors from "cors";
 
@@ -17,9 +19,11 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
+app.use("/api/languages", languageRoutes);
+app.use("/api/me", meRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Hello from CodeBox!");
+  res.send("Hello from Kotoba!");
 });
 
 app.get("/api/health", async (req, res) => {

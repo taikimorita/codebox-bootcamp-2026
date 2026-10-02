@@ -1,9 +1,21 @@
 import { useState } from "react";
 import Button from "./Button.jsx";
 
-export default function TodoItem({ todo, onUpdate, onDelete }) {
+export default function TodoItem({ todo, languages, onUpdate, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(todo.title);
+
+  // A todo can be tagged with a language the user has since stopped studying
+  const tagOptions =
+    !todo.language_code || languages.some((l) => l.code === todo.language_code)
+      ? languages
+      : [
+          ...languages,
+          {
+            code: todo.language_code,
+            native_name: todo.language_code.toUpperCase(),
+          },
+        ];
 
   async function saveEdit() {
     const next = draft.trim();
@@ -47,6 +59,22 @@ export default function TodoItem({ todo, onUpdate, onDelete }) {
           {todo.title}
         </span>
       )}
+
+      <select
+        value={todo.language_code ?? ""}
+        onChange={(e) =>
+          onUpdate(todo.id, { language_code: e.target.value || null })
+        }
+        aria-label={`Language for "${todo.title}"`}
+        className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs text-zinc-300 focus:outline-none"
+      >
+        <option value="">—</option>
+        {tagOptions.map((l) => (
+          <option key={l.code} value={l.code} lang={l.code}>
+            {l.native_name}
+          </option>
+        ))}
+      </select>
 
       {!editing && (
         <Button
