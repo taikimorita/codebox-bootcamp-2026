@@ -5,6 +5,7 @@ import Header from "./components/Header.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import DeckPage from "./pages/DeckPage.jsx";
 import DecksPage from "./pages/DecksPage.jsx";
+import ImportPage from "./pages/ImportPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
 import PracticePage from "./pages/PracticePage.jsx";
@@ -161,6 +162,16 @@ export default function App() {
             path="/decks"
             element={
               <DecksPage
+                languages={myLanguages}
+                current={current}
+                onLogout={logout}
+              />
+            }
+          />
+          <Route
+            path="/import"
+            element={
+              <ImportPage
                 languages={myLanguages}
                 current={current}
                 onLogout={logout}

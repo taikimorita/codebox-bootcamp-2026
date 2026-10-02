@@ -8,7 +8,7 @@ const DECK_COLUMNS = `d.id, d.language_code, l.name as language_name,
   (select count(*)::int from cards c where c.deck_id = d.id) as card_count`;
 const FROM = "from decks d join languages l on l.code = d.language_code";
 
-function validateName(name) {
+export function validateName(name) {
   if (typeof name !== "string" || !name.trim()) {
     throw new HttpError(400, "Deck name is required");
   }
@@ -20,7 +20,7 @@ function validateName(name) {
   return trimmed;
 }
 
-async function validateLanguage(code) {
+export async function validateLanguage(code) {
   if (code === undefined || code === null) {
     throw new HttpError(400, "Language is required");
   }

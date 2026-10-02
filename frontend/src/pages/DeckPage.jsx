@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import Button from "../components/Button.jsx";
 import CardForm from "../components/CardForm.jsx";
 import CardRow from "../components/CardRow.jsx";
+import CsvImportPanel from "../components/CsvImportPanel.jsx";
 import DeckForm from "../components/DeckForm.jsx";
 import { api } from "../api.js";
 
@@ -15,6 +16,13 @@ export default function DeckPage({ languages, onLogout }) {
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0); // bump to load again after an error
   const [editingDeck, setEditingDeck] = useState(false);
+  // CSV import: pick a file, the server previews it, then confirm
+  const [importing, setImporting] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importPreview, setImportPreview] = useState(null);
+  const [importBusy, setImportBusy] = useState(false);
+  const [importError, setImportError] = useState("");
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     let stale = false; // ignore an answer that arrives after this effect is replaced
@@ -53,6 +61,44 @@ export default function DeckPage({ languages, onLogout }) {
       if (err.status === 401) onLogout();
       else setError(err.message);
       return false;
+    }
+  }
+
+  function closeImport() {
+    setImporting(false);
+    setImportFile(null);
+    setImportPreview(null);
+    setImportError("");
+  }
+
+  async function previewImport(file) {
+    setImportFile(file);
+    setImportPreview(null);
+    setImportError("");
+    setImportBusy(true);
+    try {
+      setImportPreview(await api.importCsv(deck.id, file, true));
+    } catch (err) {
+      if (err.status === 401) return onLogout();
+      setImportError(err.message);
+    } finally {
+      setImportBusy(false);
+    }
+  }
+
+  async function confirmImport() {
+    setImportError("");
+    setImportBusy(true);
+    try {
+      const { imported } = await api.importCsv(deck.id, importFile, false);
+      closeImport();
+      setNotice(`Imported ${imported} ${imported === 1 ? "card" : "cards"}.`);
+      setAttempt((n) => n + 1); // reload the card list
+    } catch (err) {
+      if (err.status === 401) return onLogout();
+      setImportError(err.message);
+    } finally {
+      setImportBusy(false);
     }
   }
 
@@ -154,6 +200,15 @@ export default function DeckPage({ languages, onLogout }) {
           >
             Practice
           </Link>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setNotice("");
+              setImporting(true);
+            }}
+          >
+            Import CSV
+          </Button>
           <Button variant="ghost" onClick={() => setEditingDeck(true)}>
             Edit deck
           </Button>
@@ -161,6 +216,25 @@ export default function DeckPage({ languages, onLogout }) {
             Delete deck
           </Button>
         </header>
+      )}
+
+      {importing && (
+        <CsvImportPanel
+          file={importFile}
+          preview={importPreview}
+          busy={importBusy}
+          error={importError}
+          lang={deck.language_code}
+          onFile={previewImport}
+          onConfirm={confirmImport}
+          onCancel={closeImport}
+        />
+      )}
+
+      {notice && (
+        <p role="status" className="mb-4 text-sm text-emerald-300">
+          {notice}
+        </p>
       )}
 
       <CardForm lang={deck.language_code} onAdd={addCard} />

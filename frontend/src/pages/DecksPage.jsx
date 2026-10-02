@@ -91,7 +91,15 @@ export default function DecksPage({ languages, current, onLogout }) {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="mb-6 text-2xl font-semibold">Decks</h1>
+      <header className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Decks</h1>
+        <Link
+          to="/import"
+          className="rounded-lg px-3 py-2 text-sm font-medium text-emerald-400 hover:bg-zinc-800"
+        >
+          Import from Anki
+        </Link>
+      </header>
 
       {/* key: start the form over with the new default when the language changes */}
       <DeckForm

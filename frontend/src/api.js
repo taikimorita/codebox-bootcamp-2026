@@ -13,8 +13,10 @@ export class ApiError extends Error {
 }
 
 async function request(path, { method = "GET", body } = {}) {
+  // FormData (file uploads) sets its own Content-Type, including the multipart boundary
+  const isForm = body instanceof FormData;
   const headers = {};
-  if (body) headers["Content-Type"] = "application/json";
+  if (body && !isForm) headers["Content-Type"] = "application/json";
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -23,7 +25,7 @@ async function request(path, { method = "GET", body } = {}) {
     res = await fetch(`${API_URL}${path}`, {
       method,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
+      body: isForm ? body : body ? JSON.stringify(body) : undefined,
     });
   } catch {
     throw new ApiError(0, "Can't reach the server. Is the backend running?");
@@ -92,4 +94,22 @@ export const api = {
       method: "POST",
       body: { card_id: cardId, type, answer },
     }),
+  importCsv: (deckId, file, preview) => {
+    const form = new FormData();
+    form.append("file", file);
+    return request(
+      `/api/decks/${deckId}/import/csv${preview ? "?preview=true" : ""}`,
+      { method: "POST", body: form },
+    );
+  },
+  importAnki: (file, { name, language_code }, preview) => {
+    const form = new FormData();
+    if (name) form.append("name", name);
+    if (language_code) form.append("language_code", language_code);
+    form.append("file", file);
+    return request(`/api/decks/import/anki${preview ? "?preview=true" : ""}`, {
+      method: "POST",
+      body: form,
+    });
+  },
 };
