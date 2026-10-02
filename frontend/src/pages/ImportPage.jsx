@@ -1,12 +1,13 @@
+import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/Button.jsx";
 import FileDrop from "../components/FileDrop.jsx";
 import ImportPreview from "../components/ImportPreview.jsx";
+import Page, { PageHeader } from "../components/Page.jsx";
+import { InlineError } from "../components/States.jsx";
 import { api } from "../api.js";
-
-const inputClass =
-  "w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none";
+import { cardClass, inputClass } from "../styles.js";
 
 export default function ImportPage({ languages, current, onLogout }) {
   const navigate = useNavigate();
@@ -52,81 +53,94 @@ export default function ImportPage({ languages, current, onLogout }) {
   }
 
   return (
-    <main className="mx-auto max-w-2xl space-y-5 px-4 py-10">
-      <div>
-        <h1 className="text-2xl font-semibold">Import an Anki deck</h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          In Anki: File → Export → “Anki Deck Package (.apkg)”. The first field
-          becomes the front and the second the back. Media and audio aren't
-          imported. To add a CSV to an existing deck, use Import CSV on the
-          deck's page.
-        </p>
-      </div>
-
-      <FileDrop
-        accept=".apkg"
-        label={file ? file.name : "Drop an .apkg file here, or click to choose"}
-        hint={
-          file
-            ? "Drop or click to choose a different file"
-            : "Up to 20 MB and 5,000 notes"
-        }
-        disabled={busy}
-        onFile={chooseFile}
+    <Page>
+      <Link
+        to="/decks"
+        className="mb-4 inline-flex items-center gap-1 text-sm text-muted transition hover:text-fg"
+      >
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        Decks
+      </Link>
+      <PageHeader
+        title="Import an Anki deck"
+        subtitle="In Anki: File → Export → “Anki Deck Package (.apkg)”. The first field becomes the front and the second the back. Media and audio aren't imported."
       />
 
-      {busy && !preview && (
-        <p className="text-sm text-zinc-500">Reading the deck…</p>
-      )}
+      <div className="space-y-5">
+        <FileDrop
+          accept=".apkg"
+          label={file ? file.name : "Drop an .apkg file here, or click to choose"}
+          hint={
+            file
+              ? "Drop or click to choose a different file"
+              : "Up to 20 MB and 5,000 notes"
+          }
+          disabled={busy}
+          onFile={chooseFile}
+        />
 
-      {error && (
-        <p role="alert" className="text-sm text-red-400">
-          {error}
-        </p>
-      )}
+        {busy && !preview && (
+          <p role="status" className="animate-pulse text-sm text-subtle">
+            Reading the deck…
+          </p>
+        )}
 
-      {preview && (
-        <form onSubmit={confirm} className="space-y-4">
-          <ImportPreview result={preview} lang={language} />
+        <InlineError>{error}</InlineError>
 
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-            <label className="block">
-              <span className="mb-1 block text-sm text-zinc-400">
-                New deck name
-              </span>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={100}
-                className={inputClass}
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-sm text-zinc-400">Language</span>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className={inputClass}
-              >
-                {languages.map((l) => (
-                  <option key={l.code} value={l.code} lang={l.code}>
-                    {l.native_name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <Button
-            type="submit"
-            disabled={busy || preview.total === 0 || !name.trim() || !language}
+        {preview && (
+          <form
+            onSubmit={confirm}
+            className={`animate-fade-in space-y-5 p-5 ${cardClass}`}
           >
-            {busy
-              ? "Importing…"
-              : `Import ${preview.total} ${preview.total === 1 ? "card" : "cards"}`}
-          </Button>
-        </form>
-      )}
-    </main>
+            <ImportPreview result={preview} lang={language} />
+
+            <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium">
+                  New deck name
+                </span>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  maxLength={100}
+                  className={inputClass}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-medium">
+                  Language
+                </span>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className={inputClass}
+                >
+                  {languages.map((l) => (
+                    <option key={l.code} value={l.code} lang={l.code}>
+                      {l.native_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={
+                busy || preview.total === 0 || !name.trim() || !language
+              }
+            >
+              {busy
+                ? "Importing…"
+                : `Import ${preview.total} ${preview.total === 1 ? "card" : "cards"}`}
+            </Button>
+          </form>
+        )}
+
+        <p className="text-xs text-subtle">
+          To add a CSV to an existing deck, use Import CSV on the deck's page.
+        </p>
+      </div>
+    </Page>
   );
 }

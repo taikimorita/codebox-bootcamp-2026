@@ -1,5 +1,7 @@
+import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
-import Button from "./Button.jsx";
+import { fieldBase } from "../styles.js";
+import IconButton from "./IconButton.jsx";
 
 export default function TodoItem({ todo, languages, onUpdate, onDelete }) {
   const [editing, setEditing] = useState(false);
@@ -25,13 +27,13 @@ export default function TodoItem({ todo, languages, onUpdate, onDelete }) {
   }
 
   return (
-    <li className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2">
+    <li className="group flex items-center gap-3 px-4 py-2.5 transition hover:bg-surface-2/40">
       <input
         type="checkbox"
         checked={todo.completed}
         onChange={() => onUpdate(todo.id, { completed: !todo.completed })}
         aria-label={`Mark "${todo.title}" ${todo.completed ? "incomplete" : "complete"}`}
-        className="size-4 accent-emerald-500"
+        className="size-4 accent-accent"
       />
 
       {editing ? (
@@ -49,12 +51,12 @@ export default function TodoItem({ todo, languages, onUpdate, onDelete }) {
             }
           }}
           aria-label="Edit todo"
-          className="flex-1 rounded bg-zinc-800 px-2 py-1 text-sm focus:outline-none"
+          className={`${fieldBase} flex-1 border-line bg-surface px-2 py-1 text-sm`}
         />
       ) : (
         <span
           onDoubleClick={() => setEditing(true)}
-          className={`flex-1 text-sm ${todo.completed ? "text-zinc-500 line-through" : ""}`}
+          className={`flex-1 text-sm ${todo.completed ? "text-subtle line-through" : ""}`}
         >
           {todo.title}
         </span>
@@ -66,7 +68,7 @@ export default function TodoItem({ todo, languages, onUpdate, onDelete }) {
           onUpdate(todo.id, { language_code: e.target.value || null })
         }
         aria-label={`Language for "${todo.title}"`}
-        className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs text-zinc-300 focus:outline-none"
+        className={`cursor-pointer rounded-full border px-2.5 py-0.5 text-xs transition focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${todo.language_code ? "border-accent/30 bg-accent/10 text-accent-ink" : "border-line bg-surface text-subtle"}`}
       >
         <option value="">—</option>
         {tagOptions.map((l) => (
@@ -76,22 +78,21 @@ export default function TodoItem({ todo, languages, onUpdate, onDelete }) {
         ))}
       </select>
 
-      {!editing && (
-        <Button
-          variant="ghost"
-          onClick={() => setEditing(true)}
-          aria-label={`Edit "${todo.title}"`}
-        >
-          Edit
-        </Button>
-      )}
-      <Button
-        variant="danger"
-        onClick={() => onDelete(todo.id)}
-        aria-label={`Delete "${todo.title}"`}
-      >
-        Delete
-      </Button>
+      <div className="flex opacity-60 transition group-hover:opacity-100 focus-within:opacity-100">
+        {!editing && (
+          <IconButton
+            icon={Pencil}
+            label={`Edit "${todo.title}"`}
+            onClick={() => setEditing(true)}
+          />
+        )}
+        <IconButton
+          icon={Trash2}
+          variant="danger"
+          label={`Delete "${todo.title}"`}
+          onClick={() => onDelete(todo.id)}
+        />
+      </div>
     </li>
   );
 }

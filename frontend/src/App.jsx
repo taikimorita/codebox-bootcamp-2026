@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
-import Button from "./components/Button.jsx";
 import Header from "./components/Header.jsx";
+import { ErrorState } from "./components/States.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import DeckPage from "./pages/DeckPage.jsx";
 import DecksPage from "./pages/DecksPage.jsx";
@@ -91,15 +91,26 @@ export default function App() {
   }
 
   if (status === "loading")
-    return <p className="p-10 text-center text-sm text-zinc-500">Loading…</p>;
+    return (
+      <div
+        role="status"
+        aria-label="Loading"
+        className="grid min-h-screen place-items-center"
+      >
+        <span
+          lang="ja"
+          aria-hidden="true"
+          className="grid size-12 animate-pulse place-items-center rounded-xl bg-accent text-2xl font-bold text-on-accent"
+        >
+          記
+        </span>
+      </div>
+    );
 
   if (status === "error")
     return (
-      <main className="mx-auto max-w-sm px-4 py-20 text-center text-sm">
-        <p className="text-red-300">{error}</p>
-        <Button variant="ghost" className="mt-2" onClick={reloadSession}>
-          Try again
-        </Button>
+      <main className="mx-auto max-w-sm px-4 py-24">
+        <ErrorState message={error} onRetry={reloadSession} />
       </main>
     );
 

@@ -14,11 +14,13 @@ export default function ImportPreview({ result, lang }) {
   return (
     <div>
       <p className="text-sm">
-        <span className="font-medium">{plural(result.total, "card")}</span>{" "}
+        <span className="font-semibold text-accent-ink">
+          {plural(result.total, "card")}
+        </span>{" "}
         ready to import.
       </p>
       {skipped.length > 0 && (
-        <ul className="mt-1 text-xs text-zinc-500">
+        <ul className="mt-1 text-xs text-subtle">
           {skipped.map(([key, reason]) => (
             <li key={key}>
               Skipping {plural(result.skipped[key], "row")} {reason}
@@ -28,34 +30,34 @@ export default function ImportPreview({ result, lang }) {
       )}
 
       {result.preview.length > 0 && (
-        <div className="mt-3 overflow-x-auto">
+        <div className="mt-3 overflow-x-auto rounded-xl border border-line">
           <table className="w-full text-left text-sm">
-            <thead className="text-xs text-zinc-500 uppercase">
+            <thead className="border-b border-line bg-surface-2/50 text-xs text-subtle">
               <tr>
-                <th className="p-2 font-medium">Front</th>
-                <th className="p-2 font-medium">Reading</th>
-                <th className="p-2 font-medium">Back</th>
+                <th className="px-3 py-2 font-medium">Front</th>
+                <th className="px-3 py-2 font-medium">Reading</th>
+                <th className="px-3 py-2 font-medium">Back</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-line">
               {result.preview.map((card, i) => (
-                <tr key={i} className="border-t border-zinc-800 align-top">
-                  <td lang={lang} className="p-2 whitespace-pre-wrap">
+                <tr key={i} className="align-top">
+                  <td lang={lang} className="px-3 py-2 whitespace-pre-wrap">
                     {card.front}
                   </td>
                   <td
                     lang={lang}
-                    className="p-2 whitespace-pre-wrap text-zinc-400"
+                    className="px-3 py-2 whitespace-pre-wrap text-muted"
                   >
                     {card.reading || "—"}
                   </td>
-                  <td className="p-2 whitespace-pre-wrap">{card.back}</td>
+                  <td className="px-3 py-2 whitespace-pre-wrap">{card.back}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {result.total > result.preview.length && (
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="border-t border-line px-3 py-2 text-xs text-subtle">
               Showing the first {result.preview.length}.
             </p>
           )}

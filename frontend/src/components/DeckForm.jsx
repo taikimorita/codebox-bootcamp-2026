@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { fieldBase } from "../styles.js";
 import Button from "./Button.jsx";
 
 // Used both to create a deck and to rename / re-language one
@@ -32,16 +33,16 @@ export default function DeckForm({
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Deck name"
+        placeholder="Deck name, e.g. JLPT N5 verbs"
         maxLength={100}
         aria-label="Deck name"
-        className="min-w-0 flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm placeholder:text-zinc-500 focus:border-emerald-500 focus:outline-none"
+        className={`${fieldBase} min-w-48 flex-1 border-line bg-surface px-3 py-2 text-sm`}
       />
       <select
         value={language}
         onChange={(e) => setLanguage(e.target.value)}
         aria-label="Deck language"
-        className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 text-sm focus:border-emerald-500 focus:outline-none"
+        className={`${fieldBase} border-line bg-surface px-3 py-2 text-sm`}
       >
         {languages.map((l) => (
           <option key={l.code} value={l.code} lang={l.code}>

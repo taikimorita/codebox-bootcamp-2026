@@ -1,9 +1,9 @@
+import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { inputClass } from "../styles.js";
 import Button from "./Button.jsx";
+import IconButton from "./IconButton.jsx";
 import SpeakButton from "./SpeakButton.jsx";
-
-const fieldClass =
-  "w-full rounded bg-zinc-800 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500";
 
 const toDraft = (card) => ({
   front: card.front,
@@ -41,8 +41,8 @@ export default function CardRow({ card, lang, voice, onUpdate, onDelete }) {
 
   if (editing)
     return (
-      <tr className="border-t border-zinc-800 align-top">
-        <td className="p-2">
+      <tr className="bg-accent/5 align-top">
+        <td className="px-3 py-2">
           <input
             autoFocus
             lang={lang}
@@ -51,10 +51,10 @@ export default function CardRow({ card, lang, voice, onUpdate, onDelete }) {
             onKeyDown={handleKeyDown}
             maxLength={1000}
             aria-label="Front"
-            className={fieldClass}
+            className={inputClass}
           />
         </td>
-        <td className="p-2">
+        <td className="px-3 py-2">
           <input
             lang={lang}
             value={draft.reading}
@@ -62,10 +62,10 @@ export default function CardRow({ card, lang, voice, onUpdate, onDelete }) {
             onKeyDown={handleKeyDown}
             maxLength={1000}
             aria-label="Reading"
-            className={fieldClass}
+            className={inputClass}
           />
         </td>
-        <td className="p-2">
+        <td className="px-3 py-2">
           <textarea
             rows={2}
             value={draft.back}
@@ -73,10 +73,10 @@ export default function CardRow({ card, lang, voice, onUpdate, onDelete }) {
             onKeyDown={handleKeyDown}
             maxLength={1000}
             aria-label="Back"
-            className={fieldClass}
+            className={inputClass}
           />
         </td>
-        <td className="p-2">
+        <td className="px-3 py-2">
           <textarea
             rows={2}
             value={draft.notes}
@@ -84,10 +84,10 @@ export default function CardRow({ card, lang, voice, onUpdate, onDelete }) {
             onKeyDown={handleKeyDown}
             maxLength={1000}
             aria-label="Notes"
-            className={fieldClass}
+            className={inputClass}
           />
         </td>
-        <td className="p-2 whitespace-nowrap">
+        <td className="space-x-1 px-3 py-2 whitespace-nowrap">
           <Button onClick={save} disabled={saving || !canSave}>
             {saving ? "Saving…" : "Save"}
           </Button>
@@ -99,35 +99,34 @@ export default function CardRow({ card, lang, voice, onUpdate, onDelete }) {
     );
 
   return (
-    <tr className="border-t border-zinc-800 align-top">
-      <td className="p-2 text-base">
-        <span lang={lang} className="whitespace-pre-wrap">
-          {card.front}
-        </span>
-        <SpeakButton text={card.front} voice={voice} className="ml-1 text-sm" />
+    <tr className="align-top transition hover:bg-surface-2/50">
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-1">
+          <span lang={lang} className="text-base font-medium whitespace-pre-wrap">
+            {card.front}
+          </span>
+          <SpeakButton text={card.front} voice={voice} size="sm" />
+        </div>
       </td>
-      <td lang={lang} className="p-2 whitespace-pre-wrap text-zinc-400">
-        {card.reading || "—"}
+      <td lang={lang} className="px-4 py-3 whitespace-pre-wrap text-muted">
+        {card.reading || <span className="text-subtle">—</span>}
       </td>
-      <td className="p-2 whitespace-pre-wrap">{card.back}</td>
-      <td className="p-2 whitespace-pre-wrap text-zinc-400">
-        {card.notes || "—"}
+      <td className="px-4 py-3 whitespace-pre-wrap">{card.back}</td>
+      <td className="px-4 py-3 whitespace-pre-wrap text-muted">
+        {card.notes || <span className="text-subtle">—</span>}
       </td>
-      <td className="p-2 whitespace-nowrap">
-        <Button
-          variant="ghost"
+      <td className="px-2 py-2 whitespace-nowrap">
+        <IconButton
+          icon={Pencil}
+          label={`Edit "${card.front}"`}
           onClick={startEditing}
-          aria-label={`Edit "${card.front}"`}
-        >
-          Edit
-        </Button>
-        <Button
+        />
+        <IconButton
+          icon={Trash2}
           variant="danger"
+          label={`Delete "${card.front}"`}
           onClick={() => onDelete(card.id)}
-          aria-label={`Delete "${card.front}"`}
-        >
-          Delete
-        </Button>
+        />
       </td>
     </tr>
   );

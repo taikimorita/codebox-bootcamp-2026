@@ -1,8 +1,16 @@
+import { ListTodo } from "lucide-react";
 import { useEffect, useState } from "react";
-import Button from "../components/Button.jsx";
+import Page, { PageHeader } from "../components/Page.jsx";
+import {
+  EmptyState,
+  ErrorState,
+  InlineError,
+  LoadingRows,
+} from "../components/States.jsx";
 import TodoForm from "../components/TodoForm.jsx";
 import TodoItem from "../components/TodoItem.jsx";
 import { api } from "../api.js";
+import { cardClass } from "../styles.js";
 
 export default function TodosPage({ languages, current, onLogout }) {
   const [todos, setTodos] = useState([]);
@@ -78,80 +86,82 @@ export default function TodosPage({ languages, current, onLogout }) {
   );
   const remaining = inScope.filter((t) => !t.completed).length;
 
+  // Segmented control: the active option is a raised "pill"
   const tabClass = (active) =>
-    `rounded-md px-2.5 py-1 ${active ? "bg-zinc-800 text-zinc-100" : "text-zinc-400 hover:text-zinc-100"}`;
+    `rounded-md px-3 py-1 transition ${active ? "bg-surface font-medium text-fg shadow-sm" : "text-muted hover:text-fg"}`;
 
   return (
-    <main className="mx-auto max-w-xl px-4 py-10">
-      <h1 className="mb-6 text-2xl font-semibold">Study todos</h1>
-
-      {/* key: start the form over with the new default when the language changes */}
-      <TodoForm
-        key={current}
-        languages={languages}
-        defaultLanguage={current}
-        onAdd={addTodo}
+    <Page>
+      <PageHeader
+        title="Study todos"
+        subtitle="Things to do outside the app, like “Watch 1 episode in Korean”."
       />
 
-      {error && status !== "error" && (
-        <p role="alert" className="mt-3 text-sm text-red-400">
-          {error}
-        </p>
-      )}
+      <div className={`p-4 ${cardClass}`}>
+        {/* key: start the form over with the new default when the language changes */}
+        <TodoForm
+          key={current}
+          languages={languages}
+          defaultLanguage={current}
+          onAdd={addTodo}
+        />
+      </div>
 
-      <nav className="mt-6 mb-3 flex flex-wrap items-center gap-1 text-sm">
-        {["all", "active", "done"].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`capitalize ${tabClass(filter === f)}`}
-          >
-            {f}
-          </button>
-        ))}
-        <span className="mx-1 h-4 w-px bg-zinc-800" aria-hidden="true" />
-        <button
-          onClick={() => setOnlyCurrent(false)}
-          aria-pressed={!onlyCurrent}
-          className={tabClass(!onlyCurrent)}
-        >
-          Any language
-        </button>
-        {currentLanguage && (
-          <button
-            onClick={() => setOnlyCurrent(true)}
-            aria-pressed={onlyCurrent}
-            className={tabClass(onlyCurrent)}
-          >
-            Only <span lang={currentLanguage.code}>{currentLanguage.native_name}</span>
-          </button>
-        )}
-        <span className="ml-auto text-zinc-500">{remaining} left</span>
-      </nav>
+      {status !== "error" && <InlineError className="mt-3">{error}</InlineError>}
 
-      {status === "loading" && (
-        <p className="py-8 text-center text-sm text-zinc-500">Loading…</p>
-      )}
-
-      {status === "error" && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm">
-          <p className="text-red-300">{error}</p>
-          <Button variant="ghost" className="mt-2" onClick={retry}>
-            Try again
-          </Button>
+      <div className="mt-6 mb-3 flex flex-wrap items-center gap-2 text-sm">
+        <div className="inline-flex rounded-lg bg-surface-2 p-1">
+          {["all", "active", "done"].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              aria-pressed={filter === f}
+              className={`capitalize ${tabClass(filter === f)}`}
+            >
+              {f}
+            </button>
+          ))}
         </div>
-      )}
+        <div className="inline-flex rounded-lg bg-surface-2 p-1">
+          <button
+            onClick={() => setOnlyCurrent(false)}
+            aria-pressed={!onlyCurrent}
+            className={tabClass(!onlyCurrent)}
+          >
+            Any language
+          </button>
+          {currentLanguage && (
+            <button
+              onClick={() => setOnlyCurrent(true)}
+              aria-pressed={onlyCurrent}
+              className={tabClass(onlyCurrent)}
+            >
+              Only{" "}
+              <span lang={currentLanguage.code}>
+                {currentLanguage.native_name}
+              </span>
+            </button>
+          )}
+        </div>
+        <span className="ml-auto text-subtle tabular-nums">
+          {remaining} left
+        </span>
+      </div>
+
+      {status === "loading" && <LoadingRows rows={4} rowClassName="h-12" />}
+
+      {status === "error" && <ErrorState message={error} onRetry={retry} />}
 
       {status === "success" && visible.length === 0 && (
-        <p className="py-8 text-center text-sm text-zinc-500">
+        <EmptyState icon={ListTodo} title={inScope.length === 0 ? "No todos yet" : "Nothing here"}>
           {inScope.length === 0
-            ? "Nothing yet — add your first todo above."
-            : "No todos in this filter."}
-        </p>
+            ? "Add your first one above."
+            : "No todos match this filter."}
+        </EmptyState>
       )}
 
       {status === "success" && visible.length > 0 && (
-        <ul className="space-y-2">
+        <ul className={`divide-y divide-line ${cardClass}`}>
           {visible.map((t) => (
             <TodoItem
               key={t.id}
@@ -163,6 +173,6 @@ export default function TodosPage({ languages, current, onLogout }) {
           ))}
         </ul>
       )}
-    </main>
+    </Page>
   );
 }

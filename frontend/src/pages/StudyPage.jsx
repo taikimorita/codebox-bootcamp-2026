@@ -1,10 +1,21 @@
+import { Inbox, PartyPopper, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Button from "../components/Button.jsx";
 import Flashcard from "../components/Flashcard.jsx";
 import GradeButtons from "../components/GradeButtons.jsx";
+import Page from "../components/Page.jsx";
+import {
+  EmptyState,
+  ErrorState,
+  InlineError,
+  Skeleton,
+} from "../components/States.jsx";
 import { api } from "../api.js";
 import { localeFor, useVoice } from "../speech.js";
+import { cardClass, textLinkClass } from "../styles.js";
+
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 export default function StudyPage({ languages, current, onLogout }) {
   const [cards, setCards] = useState([]); // the batch the server sent, first one is showing
@@ -14,8 +25,9 @@ export default function StudyPage({ languages, current, onLogout }) {
   const [attempt, setAttempt] = useState(0); // bump to fetch the queue again
   const [revealed, setRevealed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [reviewed, setReviewed] = useState(0);
+  const [tally, setTally] = useState([0, 0, 0, 0]); // this session: again, hard, good, easy
   const card = cards[0];
+  const reviewed = tally.reduce((a, b) => a + b, 0);
   const language = languages.find((l) => l.code === current);
   const voice = useVoice(localeFor(languages, current));
 
@@ -56,7 +68,7 @@ export default function StudyPage({ languages, current, onLogout }) {
       const left = Math.max(0, totalDue - 1); // "Again" cards aren't due for 10 minutes
       setCards(rest);
       setTotalDue(left);
-      setReviewed((n) => n + 1);
+      setTally((t) => t.map((n, i) => (i === value ? n + 1 : n)));
       setRevealed(false);
       if (rest.length === 0 && left > 0) reload(); // this batch is done but more are due
     } catch (err) {
@@ -85,78 +97,136 @@ export default function StudyPage({ languages, current, onLogout }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   });
 
+  const progress = reviewed + totalDue > 0 ? reviewed / (reviewed + totalDue) : 0;
+
   return (
-    <main className="mx-auto max-w-xl px-4 py-10">
-      <header className="mb-6 flex items-baseline justify-between">
-        <h1 className="text-2xl font-semibold">
-          Study{" "}
-          {language && (
-            <span lang={language.code} className="text-zinc-400">
-              {language.native_name}
+    <Page narrow>
+      <header className="mb-6">
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Study{" "}
+            {language && (
+              <span lang={language.code} className="text-muted">
+                {language.native_name}
+              </span>
+            )}
+          </h1>
+          {status === "success" && card && (
+            <span className="text-sm text-muted tabular-nums">
+              {totalDue} left
             </span>
           )}
-        </h1>
+        </div>
         {status === "success" && card && (
-          <span className="text-sm text-zinc-500">{totalDue} due</span>
+          <div
+            role="progressbar"
+            aria-label="Session progress"
+            aria-valuenow={Math.round(progress * 100)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-2"
+          >
+            <div
+              className="h-full rounded-full bg-accent transition-[width] duration-300"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
         )}
       </header>
 
       {status === "loading" && (
-        <p className="py-16 text-center text-sm text-zinc-500">Loading…</p>
-      )}
-
-      {status === "error" && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm">
-          <p className="text-red-300">{error}</p>
-          <Button variant="ghost" className="mt-2" onClick={reload}>
-            Try again
-          </Button>
+        <div role="status" aria-label="Loading" className="space-y-6">
+          <Skeleton className="h-72" />
+          <Skeleton className="h-12" />
         </div>
       )}
 
-      {status === "success" && !card && (
-        <div className="py-16 text-center">
-          <p className="text-lg">All done 🎉</p>
-          <p className="mt-1 text-sm text-zinc-500">
-            {reviewed > 0
-              ? `You reviewed ${reviewed} ${reviewed === 1 ? "card" : "cards"}. Cards you marked Again come back in about 10 minutes.`
-              : "Nothing is due right now. New cards you add show up here straight away."}
+      {status === "error" && <ErrorState message={error} onRetry={reload} />}
+
+      {status === "success" && !card && reviewed > 0 && (
+        <div className={`animate-fade-in p-8 text-center ${cardClass}`}>
+          <span className="mx-auto mb-4 grid size-14 place-items-center rounded-full bg-accent/10 text-accent-ink">
+            <PartyPopper className="size-7" aria-hidden="true" />
+          </span>
+          <h2 className="text-xl font-semibold">Session complete</h2>
+          <p className="mt-1 text-sm text-muted">
+            You reviewed {plural(reviewed, "card")}.
           </p>
-          <div className="mt-4 flex justify-center gap-2">
-            <Button variant="ghost" onClick={reload}>
+          <dl className="mx-auto mt-6 grid max-w-sm grid-cols-4 gap-2 text-center">
+            {[
+              ["Again", tally[0], "text-danger-ink"],
+              ["Hard", tally[1], "text-warn-ink"],
+              ["Good", tally[2], "text-accent-ink"],
+              ["Easy", tally[3], "text-info-ink"],
+            ].map(([label, n, color]) => (
+              <div key={label} className="rounded-xl bg-surface-2 py-2">
+                <dt className="text-xs text-subtle">{label}</dt>
+                <dd className={`text-lg font-semibold tabular-nums ${color}`}>
+                  {n}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          {tally[0] > 0 && (
+            <p className="mt-4 text-xs text-subtle">
+              Cards you marked Again come back in about 10 minutes.
+            </p>
+          )}
+          <div className="mt-6 flex justify-center gap-2">
+            <Button variant="secondary" onClick={reload}>
+              <RotateCcw className="size-4" aria-hidden="true" />
               Check again
             </Button>
             <Link
-              to="/decks"
-              className="rounded-lg px-3 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+              to="/"
+              className="inline-flex items-center rounded-lg px-3.5 py-2 text-sm font-medium text-muted hover:bg-surface-2 hover:text-fg"
             >
-              Go to decks
+              Back home
             </Link>
           </div>
         </div>
       )}
 
+      {status === "success" && !card && reviewed === 0 && (
+        <EmptyState icon={Inbox} title="Nothing due right now">
+          New cards show up here straight away.{" "}
+          <Link to="/decks" className={textLinkClass}>
+            Add some
+          </Link>{" "}
+          or{" "}
+          <Link to="/practice" className={textLinkClass}>
+            practice
+          </Link>{" "}
+          instead.
+        </EmptyState>
+      )}
+
       {status === "success" && card && (
         <>
-          <Flashcard card={card} revealed={revealed} voice={voice} />
+          <Flashcard
+            key={card.id}
+            card={card}
+            revealed={revealed}
+            voice={voice}
+            onReveal={() => setRevealed(true)}
+          />
 
           <div className="mt-6">
             {revealed ? (
               <GradeButtons onGrade={grade} disabled={submitting} />
             ) : (
-              <Button className="w-full py-3" onClick={() => setRevealed(true)}>
-                Show answer <kbd className="ml-1.5 text-xs opacity-60">Space</kbd>
+              <Button size="lg" className="w-full" onClick={() => setRevealed(true)}>
+                Show answer
+                <kbd className="hidden rounded border border-current/30 px-1.5 font-sans text-[10px] opacity-70 sm:inline">
+                  Space
+                </kbd>
               </Button>
             )}
           </div>
 
-          {error && (
-            <p role="alert" className="mt-3 text-sm text-red-400">
-              {error}
-            </p>
-          )}
+          <InlineError className="mt-3">{error}</InlineError>
         </>
       )}
-    </main>
+    </Page>
   );
 }
