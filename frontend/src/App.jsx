@@ -7,6 +7,7 @@ import DeckPage from "./pages/DeckPage.jsx";
 import DecksPage from "./pages/DecksPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
+import PracticePage from "./pages/PracticePage.jsx";
 import StudyPage from "./pages/StudyPage.jsx";
 import TodosPage from "./pages/TodosPage.jsx";
 import { api, clearToken, getToken } from "./api.js";
@@ -179,6 +180,10 @@ export default function App() {
                 onLogout={logout}
               />
             }
+          />
+          <Route
+            path="/practice"
+            element={<PracticePage current={current} onLogout={logout} />}
           />
           <Route
             path="/todos"

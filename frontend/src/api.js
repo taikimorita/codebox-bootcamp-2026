@@ -83,4 +83,13 @@ export const api = {
       method: "POST",
       body: { grade, mode },
     }),
+  getPractice: (deckId, type, count) =>
+    request(
+      `/api/practice?deck=${encodeURIComponent(deckId)}&type=${encodeURIComponent(type)}&count=${encodeURIComponent(count)}`,
+    ),
+  answerPractice: (cardId, type, answer) =>
+    request("/api/practice/answer", {
+      method: "POST",
+      body: { card_id: cardId, type, answer },
+    }),
 };

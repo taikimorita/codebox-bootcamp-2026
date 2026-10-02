@@ -7,6 +7,7 @@ import meRoutes from "./routes/me.js";
 import deckRoutes from "./routes/decks.js";
 import cardRoutes from "./routes/cards.js";
 import studyRoutes from "./routes/study.js";
+import practiceRoutes from "./routes/practice.js";
 import { pool } from "./db/database.js";
 import cors from "cors";
 
@@ -27,6 +28,7 @@ app.use("/api/me", meRoutes);
 app.use("/api/decks", deckRoutes);
 app.use("/api/cards", cardRoutes);
 app.use("/api/study", studyRoutes);
+app.use("/api/practice", practiceRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello from Kioku!");

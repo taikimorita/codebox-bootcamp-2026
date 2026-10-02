@@ -148,6 +148,12 @@ export default function DeckPage({ languages, onLogout }) {
               · {cards.length === 1 ? "1 card" : `${cards.length} cards`}
             </p>
           </div>
+          <Link
+            to={`/practice?deck=${deck.id}`}
+            className="rounded-lg px-3 py-2 text-sm font-medium text-emerald-400 hover:bg-zinc-800"
+          >
+            Practice
+          </Link>
           <Button variant="ghost" onClick={() => setEditingDeck(true)}>
             Edit deck
           </Button>

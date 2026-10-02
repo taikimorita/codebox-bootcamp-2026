@@ -21,6 +21,9 @@ export default function Header({
           <NavLink to="/study" className={linkClass}>
             Study
           </NavLink>
+          <NavLink to="/practice" className={linkClass}>
+            Practice
+          </NavLink>
           <NavLink to="/decks" className={linkClass}>
             Decks
           </NavLink>

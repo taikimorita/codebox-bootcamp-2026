@@ -22,6 +22,12 @@ export default function DashboardPage({ languages, current }) {
         <Link to="/study" className="text-emerald-400 hover:text-emerald-300">
           Study now →
         </Link>
+        <Link
+          to="/practice"
+          className="text-emerald-400 hover:text-emerald-300"
+        >
+          Practice →
+        </Link>
         <Link to="/decks" className="text-emerald-400 hover:text-emerald-300">
           Your decks →
         </Link>
