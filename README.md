@@ -4,9 +4,6 @@ Kioku (記憶, "memory") is a flashcard app for learning languages. It supports 
 
 **Live app:** https://codebox-bootcamp-2026.vercel.app
 
-
-**Live app:** https://codebox-bootcamp-2026.vercel.app
-
 The backend runs on Render's free tier and sleeps when no one is using it, so the first load can take up to a minute.
 
 ## Features
