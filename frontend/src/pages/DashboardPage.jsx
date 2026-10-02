@@ -16,14 +16,16 @@ export default function DashboardPage({ languages, current }) {
         </p>
       )}
       <p className="mt-4 text-sm text-zinc-500">
-        Decks, reviews and streaks will show up here in later stages.
+        Reviews and streaks will show up here in later stages.
       </p>
-      <Link
-        to="/todos"
-        className="mt-6 inline-block text-sm text-emerald-400 hover:text-emerald-300"
-      >
-        Go to your study todos →
-      </Link>
+      <div className="mt-6 flex gap-6 text-sm">
+        <Link to="/decks" className="text-emerald-400 hover:text-emerald-300">
+          Your decks →
+        </Link>
+        <Link to="/todos" className="text-emerald-400 hover:text-emerald-300">
+          Your study todos →
+        </Link>
+      </div>
     </main>
   );
 }

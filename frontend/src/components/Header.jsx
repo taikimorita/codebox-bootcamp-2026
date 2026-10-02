@@ -18,6 +18,9 @@ export default function Header({
           <NavLink to="/" end className={linkClass}>
             Dashboard
           </NavLink>
+          <NavLink to="/decks" className={linkClass}>
+            Decks
+          </NavLink>
           <NavLink to="/todos" className={linkClass}>
             Todos
           </NavLink>

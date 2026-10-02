@@ -63,4 +63,17 @@ export const api = {
   updateTodo: (id, changes) =>
     request(`/api/todos/${id}`, { method: "PATCH", body: changes }),
   deleteTodo: (id) => request(`/api/todos/${id}`, { method: "DELETE" }),
+  listDecks: () => request("/api/decks"),
+  getDeck: (id) => request(`/api/decks/${id}`),
+  createDeck: (name, language_code) =>
+    request("/api/decks", { method: "POST", body: { name, language_code } }),
+  updateDeck: (id, changes) =>
+    request(`/api/decks/${id}`, { method: "PATCH", body: changes }),
+  deleteDeck: (id) => request(`/api/decks/${id}`, { method: "DELETE" }),
+  listCards: (deckId) => request(`/api/decks/${deckId}/cards`),
+  createCard: (deckId, card) =>
+    request(`/api/decks/${deckId}/cards`, { method: "POST", body: card }),
+  updateCard: (id, changes) =>
+    request(`/api/cards/${id}`, { method: "PATCH", body: changes }),
+  deleteCard: (id) => request(`/api/cards/${id}`, { method: "DELETE" }),
 };

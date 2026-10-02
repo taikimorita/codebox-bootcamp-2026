@@ -4,6 +4,8 @@ import authRoutes from "./routes/auth.js";
 import todoRoutes from "./routes/todos.js";
 import languageRoutes from "./routes/languages.js";
 import meRoutes from "./routes/me.js";
+import deckRoutes from "./routes/decks.js";
+import cardRoutes from "./routes/cards.js";
 import { pool } from "./db/database.js";
 import cors from "cors";
 
@@ -21,6 +23,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/languages", languageRoutes);
 app.use("/api/me", meRoutes);
+app.use("/api/decks", deckRoutes);
+app.use("/api/cards", cardRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello from Kotoba!");

@@ -3,6 +3,8 @@ import { Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 import Button from "./components/Button.jsx";
 import Header from "./components/Header.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
+import DeckPage from "./pages/DeckPage.jsx";
+import DecksPage from "./pages/DecksPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
 import TodosPage from "./pages/TodosPage.jsx";
@@ -152,6 +154,20 @@ export default function App() {
           <Route
             path="/"
             element={<DashboardPage languages={myLanguages} current={current} />}
+          />
+          <Route
+            path="/decks"
+            element={
+              <DecksPage
+                languages={myLanguages}
+                current={current}
+                onLogout={logout}
+              />
+            }
+          />
+          <Route
+            path="/decks/:id"
+            element={<DeckPage languages={myLanguages} onLogout={logout} />}
           />
           <Route
             path="/todos"
