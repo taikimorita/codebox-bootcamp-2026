@@ -34,10 +34,10 @@ export default function LoginPage({ onAuthed }) {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
-      <h1 className="text-2xl font-semibold">CodeBox Todos</h1>
+      <h1 className="text-2xl font-semibold">Kioku</h1>
       <p className="mt-1 mb-6 text-sm text-zinc-400">
         {mode === "login"
-          ? "Log in to see your todos."
+          ? "Log in to keep studying."
           : "Create an account to get started."}
       </p>
 

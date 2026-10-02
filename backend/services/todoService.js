@@ -1,5 +1,6 @@
 import { query } from "../db/database.js";
 import { HttpError } from "../utils/HttpError.js";
+import { validateCode } from "./languageService.js";
 
 function validateTitle(title) {
   if (typeof title !== "string" || !title.trim()) {
@@ -15,10 +16,17 @@ function parseId(id) {
   return n;
 }
 
-export async function list(userId) {
+export async function list(userId, language) {
+  if (language === undefined) {
+    const { rows } = await query(
+      "select * from todos where user_id = $1 order by created_at desc",
+      [userId],
+    );
+    return rows;
+  }
   const { rows } = await query(
-    "select * from todos where user_id = $1 order by created_at desc",
-    [userId],
+    "select * from todos where user_id = $1 and language_code = $2 order by created_at desc",
+    [userId, await validateCode(language)],
   );
   return rows;
 }
@@ -32,10 +40,10 @@ export async function getOne(userId, id) {
   return rows[0];
 }
 
-export async function create(userId, { title }) {
+export async function create(userId, { title, language_code }) {
   const { rows } = await query(
-    "insert into todos (user_id, title) values ($1, $2) returning *",
-    [userId, validateTitle(title)],
+    "insert into todos (user_id, title, language_code) values ($1, $2, $3) returning *",
+    [userId, validateTitle(title), await validateCode(language_code)],
   );
   return rows[0];
 }
@@ -50,9 +58,13 @@ export async function update(userId, id, body) {
       throw new HttpError(400, "completed must be true or false");
     completed = body.completed;
   }
+  const languageCode =
+    body.language_code !== undefined
+      ? await validateCode(body.language_code)
+      : todo.language_code;
   const { rows } = await query(
-    "update todos set title = $1, completed = $2 where id = $3 and user_id = $4 returning *",
-    [title, completed, todo.id, userId],
+    "update todos set title = $1, completed = $2, language_code = $3 where id = $4 and user_id = $5 returning *",
+    [title, completed, languageCode, todo.id, userId],
   );
   return rows[0];
 }

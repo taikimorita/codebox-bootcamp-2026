@@ -12,3 +12,19 @@ export const pool = new pg.Pool({
 });
 
 export const query = (text, params) => pool.query(text, params);
+
+// Runs fn(client) inside begin/commit, and rolls back if anything throws
+export async function transaction(fn) {
+  const client = await pool.connect();
+  try {
+    await client.query("begin");
+    const result = await fn(client);
+    await client.query("commit");
+    return result;
+  } catch (err) {
+    await client.query("rollback");
+    throw err;
+  } finally {
+    client.release();
+  }
+}

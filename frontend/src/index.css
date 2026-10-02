@@ -3,3 +3,18 @@
 body {
   @apply bg-zinc-950 text-zinc-100 antialiased;
 }
+
+/*
+  Chinese, Japanese and Korean share many characters but draw them differently.
+  Each lang="..." element gets that language's font, so 直 or 骨 look right to its readers.
+  :lang() also matches everything inside the element, and "zh" matches zh-CN etc.
+*/
+:lang(ja) {
+  font-family: "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+}
+:lang(ko) {
+  font-family: "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+}
+:lang(zh) {
+  font-family: "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+}

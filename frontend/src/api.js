@@ -13,8 +13,10 @@ export class ApiError extends Error {
 }
 
 async function request(path, { method = "GET", body } = {}) {
+  // FormData (file uploads) sets its own Content-Type, including the multipart boundary
+  const isForm = body instanceof FormData;
   const headers = {};
-  if (body) headers["Content-Type"] = "application/json";
+  if (body && !isForm) headers["Content-Type"] = "application/json";
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -23,7 +25,7 @@ async function request(path, { method = "GET", body } = {}) {
     res = await fetch(`${API_URL}${path}`, {
       method,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
+      body: isForm ? body : body ? JSON.stringify(body) : undefined,
     });
   } catch {
     throw new ApiError(0, "Can't reach the server. Is the backend running?");
@@ -48,10 +50,68 @@ export const api = {
   login: (email, password) =>
     request("/api/auth/login", { method: "POST", body: { email, password } }),
   me: () => request("/api/auth/me"),
-  listTodos: () => request("/api/todos"),
-  createTodo: (title) =>
-    request("/api/todos", { method: "POST", body: { title } }),
+  getDashboard: (timeZone) =>
+    request(`/api/dashboard?tz=${encodeURIComponent(timeZone)}`),
+  listLanguages: () => request("/api/languages"),
+  getMyLanguages: () => request("/api/me/languages"),
+  setMyLanguages: (codes) =>
+    request("/api/me/languages", { method: "PUT", body: { codes } }),
+  listTodos: (language) =>
+    request(
+      language
+        ? `/api/todos?language=${encodeURIComponent(language)}`
+        : "/api/todos",
+    ),
+  createTodo: (title, language_code) =>
+    request("/api/todos", { method: "POST", body: { title, language_code } }),
   updateTodo: (id, changes) =>
     request(`/api/todos/${id}`, { method: "PATCH", body: changes }),
   deleteTodo: (id) => request(`/api/todos/${id}`, { method: "DELETE" }),
+  listDecks: () => request("/api/decks"),
+  getDeck: (id) => request(`/api/decks/${id}`),
+  createDeck: (name, language_code) =>
+    request("/api/decks", { method: "POST", body: { name, language_code } }),
+  updateDeck: (id, changes) =>
+    request(`/api/decks/${id}`, { method: "PATCH", body: changes }),
+  deleteDeck: (id) => request(`/api/decks/${id}`, { method: "DELETE" }),
+  listCards: (deckId) => request(`/api/decks/${deckId}/cards`),
+  createCard: (deckId, card) =>
+    request(`/api/decks/${deckId}/cards`, { method: "POST", body: card }),
+  updateCard: (id, changes) =>
+    request(`/api/cards/${id}`, { method: "PATCH", body: changes }),
+  deleteCard: (id) => request(`/api/cards/${id}`, { method: "DELETE" }),
+  getStudyQueue: (language) =>
+    request(`/api/study/queue?language=${encodeURIComponent(language)}`),
+  reviewCard: (id, grade, mode) =>
+    request(`/api/cards/${id}/review`, {
+      method: "POST",
+      body: { grade, mode },
+    }),
+  getPractice: (deckId, type, count) =>
+    request(
+      `/api/practice?deck=${encodeURIComponent(deckId)}&type=${encodeURIComponent(type)}&count=${encodeURIComponent(count)}`,
+    ),
+  answerPractice: (cardId, type, answer) =>
+    request("/api/practice/answer", {
+      method: "POST",
+      body: { card_id: cardId, type, answer },
+    }),
+  importCsv: (deckId, file, preview) => {
+    const form = new FormData();
+    form.append("file", file);
+    return request(
+      `/api/decks/${deckId}/import/csv${preview ? "?preview=true" : ""}`,
+      { method: "POST", body: form },
+    );
+  },
+  importAnki: (file, { name, language_code }, preview) => {
+    const form = new FormData();
+    if (name) form.append("name", name);
+    if (language_code) form.append("language_code", language_code);
+    form.append("file", file);
+    return request(`/api/decks/import/anki${preview ? "?preview=true" : ""}`, {
+      method: "POST",
+      body: form,
+    });
+  },
 };
